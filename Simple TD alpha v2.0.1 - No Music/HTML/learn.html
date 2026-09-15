@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--
+    SIMPLE TD – Learn to Play (Tutorial) – Text Guide
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 Learn to Play – Text Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            color: #f0ece3;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(8, 18, 22, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            padding: 1.8rem 2rem 2rem;
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .guide-section {
+            margin-bottom: 1.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1rem;
+        }
+        .guide-section h2 {
+            color: #ffcd94;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .guide-section p,
+        .guide-section li {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        .guide-section ul {
+            list-style: disc;
+            padding-left: 1.5rem;
+            margin-top: 0.3rem;
+        }
+        .guide-section .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+        .guide-section .mini-item {
+            background: rgba(20, 34, 30, 0.3);
+            border-radius: 0.8rem;
+            padding: 0.4rem 0.5rem;
+            text-align: center;
+            border: 1px solid rgba(80, 180, 140, 0.06);
+        }
+        .guide-section .mini-item .icon {
+            font-size: 1.6rem;
+        }
+        .guide-section .mini-item .name {
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .guide-section .mini-item .desc {
+            font-size: 0.65rem;
+            opacity: 0.6;
+        }
+        .guide-section .tip {
+            background: rgba(244, 162, 97, 0.06);
+            border-radius: 0.6rem;
+            padding: 0.4rem 0.8rem;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(244, 162, 97, 0.08);
+            font-size: 0.85rem;
+        }
+        .guide-section .tip strong {
+            color: #ffcd94;
+        }
+
+        .complete-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto 0;
+            padding: 0.8rem 1.5rem;
+            background: #4a6e3c;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.15s;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(74, 110, 60, 0.3);
+        }
+        .complete-btn:hover {
+            background: #5a8e4c;
+            transform: scale(1.02);
+        }
+        .complete-btn:active {
+            transform: scale(0.96);
+        }
+
+        .footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.6rem;
+            opacity: 0.25;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            .guide-section h2 {
+                font-size: 1.1rem;
+            }
+            .guide-section p,
+            .guide-section li {
+                font-size: 0.85rem;
+            }
+            .guide-section .mini-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Learn to Play</h1>
+            <button class="back-btn" id="backBtn">⬅ BACK</button>
+        </div>
+
+        <!-- ===== BASICS ===== -->
+        <div class="guide-section">
+            <h2>🎯 Basics</h2>
+            <p><strong>Goal:</strong> Defend your base by building towers along a path to stop enemies from reaching the end. Each enemy that slips through costs you a life. Lose all lives and it's game over!</p>
+            <p><strong>Coins 🪙</strong> – earned by killing enemies and completing waves. Used to build and upgrade towers.</p>
+            <p><strong>Gems 💎</strong> – earned every wave. Used in the Shop to unlock new towers, increase max levels, buy permanent upgrades, and unlock heroes.</p>
+            <p><strong>Shards 🔮</strong> – earned every 10 player levels. Used in the Skill Tree for tower upgrades, hero upgrades, and powerful Knowledge upgrades.</p>
+            <div class="tip"><strong>💡 Tip:</strong> Your first tower starts the game with a scout wave – watch him walk the path to see where enemies will go!</div>
+        </div>
+
+        <!-- ===== TOWERS ===== -->
+        <div class="guide-section">
+            <h2>🏰 Towers</h2>
+            <p>Place towers on grass tiles (not on the path). Each tower has unique strengths:</p>
+            <div class="mini-grid">
+                <div class="mini-item"><div class="icon">🏹</div><div class="name">Archer</div><div class="desc">Cheap, reliable single‑target damage.</div></div>
+                <div class="mini-item"><div class="icon">💣</div><div class="name">Bomber</div><div class="desc">Drops bombs on the path – splash damage.</div></div>
+                <div class="mini-item"><div class="icon">☠️</div><div class="name">Venom</div><div class="desc">Aura that poisons nearby enemies.</div></div>
+                <div class="mini-item"><div class="icon">🎯</div><div class="name">Dart</div><div class="desc">Fast, high critical hit chance.</div></div>
+                <div class="mini-item"><div class="icon">🌾</div><div class="name">Farm</div><div class="desc">Generates passive income over time.</div></div>
+                <div class="mini-item"><div class="icon">🔭</div><div class="name">Sniper</div><div class="desc">Infinite range, massive damage – great for bosses.</div></div>
+                <div class="mini-item"><div class="icon">🧙</div><div class="name">Mage</div><div class="desc">Chain lightning that bounces between enemies.</div></div>
+            </div>
+            <p><strong>Placing:</strong> Click a tower icon in the sidebar to select it, then click a grass tile. You can also drag towers directly onto the map.</p>
+            <p><strong>Upgrading:</strong> Click a built tower to open its popup – spend coins to increase its level, boosting damage, range, and fire rate.</p>
+            <div class="tip"><strong>💡 Strategy:</strong> Mix tower types! Archers for early waves, Farms for economy, Bombers for crowds, Snipers for bosses.</div>
+        </div>
+
+        <!-- ===== HEROES ===== -->
+        <div class="guide-section">
+            <h2>🦸 Heroes</h2>
+            <p>Heroes are powerful units that provide unique abilities and buffs. You can unlock them with gems in the Shop.</p>
+            <div class="mini-grid">
+                <div class="mini-item"><div class="icon">🕷️</div><div class="name">Clacks</div><div class="desc">Throws mini bombs (area damage). Boosts tower fire rate.</div></div>
+                <div class="mini-item"><div class="icon">🕸️</div><div class="name">Spoder</div><div class="desc">Shoots in 8 directions, applies poison, gives a global discount.</div></div>
+                <div class="mini-item"><div class="icon">🎯</div><div class="name">Mini Fun</div><div class="desc">Fires in a chosen direction continuously – can be rotated.</div></div>
+                <div class="mini-item"><div class="icon">🌳</div><div class="name">Trae</div><div class="desc">Tree that generates gold and buffs farms; levels up with farms placed.</div></div>
+            </div>
+            <p><strong>Placing:</strong> Once unlocked, select a hero from the sidebar (🦸 icon) and click a grass tile. You can only place each hero once per game (unless Unlimited Heroes is enabled).</p>
+            <p><strong>Leveling:</strong> Heroes gain levels by dealing damage – each level improves their abilities. Place them early so they have time to grow!</p>
+            <div class="tip"><strong>💡 Tip:</strong> Trae is excellent for farming strategies. Clacks works well with any tower setup.</div>
+        </div>
+
+        <!-- ===== ENEMIES & BOSSES ===== -->
+        <div class="guide-section">
+            <h2>👾 Enemies & Bosses</h2>
+            <p>Enemies come in waves. Each has different stats:</p>
+            <ul>
+                <li><strong>🟢 Sprout</strong> – Weak, numerous.</li>
+                <li><strong>🔵 Frostling</strong> – Tanky, slow.</li>
+                <li><strong>🟠 Charger</strong> – Fast, fragile.</li>
+                <li><strong>🔴 Brute</strong> – High HP, tough.</li>
+                <li><strong>🟣 Shade</strong> – Elusive, dodges attacks.</li>
+            </ul>
+            <p><strong>Bosses</strong> appear at waves 40, 80, and 100:</p>
+            <ul>
+                <li>🐕 <strong>Cerberus</strong> – Wave 40</li>
+                <li>🐘 <strong>Behemoth</strong> – Wave 80</li>
+                <li>👑 <strong>Titan</strong> – Wave 100</li>
+            </ul>
+            <p>After wave 100, mini‑bosses can appear randomly.</p>
+            <div class="tip"><strong>💡 Tip:</strong> Check the Bestiary (📖) for detailed stats and combat tips against each enemy.</div>
+        </div>
+
+        <!-- ===== DIFFICULTY & ROGUE-LIKE ===== -->
+        <div class="guide-section">
+            <h2>⚔️ Difficulty & Rogue‑like</h2>
+            <p>There are <strong>7 difficulty tiers</strong> (Easy, Normal, Hard, Challenger, Death, Hell, Primal). Each is harder and must be unlocked by reaching specific waves on the previous difficulty.</p>
+            <p><strong>Rogue‑like Mode</strong> becomes available once you unlock all 7 difficulties. In this mode:</p>
+            <ul>
+                <li>You start with only the Archer tower – you unlock more as you go.</li>
+                <li>Every 5 waves, you choose 1 of 3 random upgrades (tower unlocks, buffs, hero unlocks, etc.).</li>
+                <li>Difficulty is fixed to Normal.</li>
+                <li>Win by reaching Wave 100!</li>
+            </ul>
+            <div class="tip"><strong>💡 Tip:</strong> Rogue‑like is a great way to test your adaptability. Choose upgrades that complement your current towers.</div>
+        </div>
+
+        <!-- ===== SHOP & SKILL TREE ===== -->
+        <div class="guide-section">
+            <h2>🏪 Shop & Skill Tree</h2>
+            <p><strong>Shop (Gems 💎)</strong></p>
+            <ul>
+                <li>Unlock new towers (Bomber, Venom, Dart, Farm, Sniper, Mage).</li>
+                <li>Increase a tower's max level (costs increasing gems).</li>
+                <li>Buy permanent upgrades: Extra Starting Cash (+200 coins) and Fortifications (+5 lives).</li>
+                <li>Unlock heroes with gems.</li>
+            </ul>
+            <p><strong>Skill Tree (Shards 🔮)</strong></p>
+            <ul>
+                <li>Spend shards on tower‑specific upgrades (3 per tower).</li>
+                <li>Spend shards on hero upgrades (3 per hero).</li>
+                <li>Spend shards on <strong>Knowledge</strong> – powerful global upgrades (Archery, Serpants, Heroes Chant, Heroes Wallet).</li>
+            </ul>
+            <div class="tip"><strong>💡 Tip:</strong> Prioritize upgrades that match your playstyle. Archer upgrades are great early, Farm upgrades boost income, Knowledge unlocks global bonuses.</div>
+        </div>
+
+        <!-- ===== CONTROLS ===== -->
+        <div class="guide-section">
+            <h2>⌨️ Controls</h2>
+            <p><strong>🖱️ Mouse / Touch</strong></p>
+            <ul>
+                <li><strong>Select a tower:</strong> Click a tower icon in the sidebar (or drag it).</li>
+                <li><strong>Place a tower:</strong> Click a grass tile on the map – the selected tower will be built.</li>
+                <li><strong>Drag & drop:</strong> Drag a tower icon from the sidebar directly onto the map.</li>
+                <li><strong>Manage towers:</strong> Click a built tower to upgrade or sell it.</li>
+                <li><strong>Game menu:</strong> Click the ☰ (hamburger) button in the top‑left.</li>
+            </ul>
+            <p><strong>⌨️ Keyboard</strong></p>
+            <ul>
+                <li><kbd>P</kbd> – Pause / Resume</li>
+                <li><kbd>Space</kbd> – Hold to speed up the game (Turbo)</li>
+                <li><kbd>←</kbd> / <kbd>→</kbd> – Seek in Music player</li>
+                <li><kbd>↑</kbd> / <kbd>↓</kbd> – Volume control in Music player</li>
+            </ul>
+        </div>
+
+        <!-- ===== STRATEGY TIPS ===== -->
+        <div class="guide-section">
+            <h2>💡 Strategy Guide</h2>
+            <p><strong>Early game (Waves 1–15):</strong> Build 2–3 Archers near the start, save for a Farm to generate income, and upgrade your best Archer.</p>
+            <p><strong>Mid game (Waves 16–50):</strong> Add 2–3 Farms, unlock Bombers or Venom for crowd control, place your hero early, and save gems for tower unlocks.</p>
+            <p><strong>Late game (Waves 51+):</strong> Build Snipers for bosses, use Mages for groups, max level your key towers, and invest in Skill Tree upgrades.</p>
+            <p><strong>Rogue‑like:</strong> Prioritize Farm unlocks early, choose buffs that complement your towers, and grab hero unlocks when they appear.</p>
+            <div class="tip"><strong>💡 Tip:</strong> Check the Bestiary to learn enemy weaknesses, and the Achievements page for long‑term goals!</div>
+        </div>
+
+        <!-- ===== COMPLETE BUTTON ===== -->
+        <button class="complete-btn" id="completeBtn">✅ I've Read Everything </button>
+    </div>
+
+    <script>
+        // ================================================================
+        // COMPLETE TUTORIAL – unlock easy mode and navigate to menu
+        // ================================================================
+        document.getElementById('completeBtn').addEventListener('click', function() {
+            // Check if already completed to avoid double unlocking
+            if (localStorage.getItem('td_tutorial_complete') === 'true') {
+                alert('Tutorial already completed!');
+                window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+                return;
+            }
+
+            // Unlock easy mode if not already
+            let unlocked = JSON.parse(localStorage.getItem('td_unlockedDifficulties') || '["easy"]');
+            if (!unlocked.includes('easy')) {
+                unlocked.push('easy');
+                localStorage.setItem('td_unlockedDifficulties', JSON.stringify(unlocked));
+            }
+            localStorage.setItem('td_tutorial_complete', 'true');
+
+            // Show confirmation and go to menu
+            alert('🎉 Tutorial complete! Easy mode is now unlocked.');
+            window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+        });
+
+        // ================================================================
+        // BACK BUTTON
+        // ================================================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+        });
+
+        console.log('📖 Text-based tutorial loaded. Click the button to unlock easy mode.');
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Stats – Dark Record Book</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0806;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            font-family: 'Special Elite', 'Courier Prime', serif;
+            color: #b8a88a;
+        }
+
+        /* ===== DARK BOOK ===== */
+        .book {
+            max-width: 1000px;
+            width: 100%;
+            background: #14100c;
+            background-image:
+                repeating-linear-gradient(0deg, rgba(30, 25, 20, 0.3) 0px, rgba(30, 25, 20, 0.3) 2px, transparent 2px, transparent 6px),
+                radial-gradient(ellipse at 30% 40%, rgba(40, 30, 20, 0.12) 0%, transparent 70%);
+            border-radius: 4px 20px 20px 4px;
+            padding: 28px 32px 22px;
+            position: relative;
+            box-shadow:
+                0 4px 0 #2a1f18,
+                0 8px 0 #1a120e,
+                0 12px 40px rgba(0,0,0,0.9),
+                inset 0 0 80px rgba(20, 15, 10, 0.3);
+            border: 3px solid #2a1f18;
+            border-left: 12px solid #2a1f18;
+        }
+
+        /* ===== SPINE EFFECT ===== */
+        .book::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: -3px;
+            bottom: -3px;
+            width: 12px;
+            background: linear-gradient(90deg, #1a120e, #2a1f18);
+            border-radius: 4px 0 0 4px;
+            border: 3px solid #2a1f18;
+            border-right: none;
+        }
+
+        /* ===== AGED EDGE ===== */
+        .book::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 4px 20px 20px 4px;
+            background:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 8px,
+                    rgba(40, 30, 20, 0.02) 8px,
+                    rgba(40, 30, 20, 0.02) 9px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ===== DECORATIVE BORDER ===== */
+        .book-border {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            border: 1px solid rgba(60, 45, 35, 0.08);
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ===== HEADER ===== */
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 3px double rgba(60, 45, 35, 0.15);
+            position: relative;
+            z-index: 2;
+        }
+        .book-header h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: #d4c4a8;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+            font-family: 'Special Elite', serif;
+        }
+        .book-header h1 small {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            opacity: 0.3;
+            display: block;
+            font-weight: 400;
+            color: #6a5a4a;
+        }
+        .back-btn {
+            background: rgba(60, 45, 35, 0.2);
+            border: 2px solid rgba(60, 45, 35, 0.2);
+            padding: 0.4rem 1.8rem;
+            border-radius: 30px;
+            color: #c8b89a;
+            font-size: 0.8rem;
+            font-family: 'Special Elite', serif;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+        .back-btn:hover {
+            background: rgba(60, 45, 35, 0.35);
+            color: #e8dcc8;
+            transform: scale(1.02);
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        .stat-card {
+            background: rgba(30, 25, 20, 0.4);
+            border-radius: 6px;
+            padding: 0.8rem 0.6rem;
+            text-align: center;
+            border: 1px solid rgba(60, 45, 35, 0.06);
+            transition: 0.2s;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .stat-card:hover {
+            background: rgba(40, 32, 26, 0.5);
+            border-color: rgba(60, 45, 35, 0.12);
+        }
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #d4c4a8;
+            line-height: 1.1;
+            font-family: 'Courier Prime', monospace;
+        }
+        .stat-card .label {
+            font-size: 0.55rem;
+            opacity: 0.4;
+            margin-top: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-family: 'Courier Prime', monospace;
+            color: #8a7a6a;
+        }
+        .stat-card .icon {
+            font-size: 1.4rem;
+            margin-bottom: 0.1rem;
+            display: block;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            color: #d4c4a8;
+            margin: 1.5rem 0 0.8rem 0;
+            padding-bottom: 0.3rem;
+            border-bottom: 2px dotted rgba(60, 45, 35, 0.12);
+            font-family: 'Special Elite', serif;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== TOWER STATS ===== */
+        .tower-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.6rem;
+            position: relative;
+            z-index: 2;
+        }
+        .tower-stat {
+            background: rgba(30, 25, 20, 0.3);
+            border-radius: 6px;
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            border: 1px solid rgba(60, 45, 35, 0.04);
+        }
+        .tower-stat .name {
+            font-size: 0.65rem;
+            font-weight: 700;
+            font-family: 'Special Elite', serif;
+            color: #b8a88a;
+        }
+        .tower-stat .count {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #c8b89a;
+            font-family: 'Courier Prime', monospace;
+        }
+        .tower-stat .sub {
+            font-size: 0.45rem;
+            opacity: 0.3;
+            font-family: 'Courier Prime', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6a5a4a;
+        }
+        .tower-stat.locked-stat {
+            opacity: 0.3;
+        }
+
+        /* ===== DIFFICULTY PROGRESS ===== */
+        .difficulty-progress {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        .diff-prog {
+            background: rgba(30, 25, 20, 0.3);
+            border-radius: 6px;
+            padding: 0.5rem 0.7rem;
+            border-left: 3px solid rgba(60, 45, 35, 0.1);
+            border: 1px solid rgba(60, 45, 35, 0.04);
+        }
+        .diff-prog.unlocked { border-left-color: #b8a050; background: rgba(60, 50, 30, 0.12); }
+        .diff-prog .name {
+            font-weight: 700;
+            font-size: 0.7rem;
+            font-family: 'Special Elite', serif;
+            color: #c8b89a;
+        }
+        .diff-prog .wave {
+            font-size: 0.55rem;
+            opacity: 0.4;
+            font-family: 'Courier Prime', monospace;
+            color: #8a7a6a;
+        }
+        .diff-prog .bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(60, 45, 35, 0.06);
+            border-radius: 4px;
+            margin-top: 0.3rem;
+            overflow: hidden;
+        }
+        .diff-prog .bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8a7a3a, #b8a050);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        /* ===== ROGUE STATS ===== */
+        .rogue-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        .rogue-stat {
+            background: rgba(40, 30, 40, 0.15);
+            border-radius: 6px;
+            padding: 0.5rem 0.6rem;
+            text-align: center;
+            border: 1px solid rgba(80, 60, 80, 0.04);
+            transition: 0.2s;
+        }
+        .rogue-stat:hover {
+            background: rgba(50, 38, 50, 0.2);
+            border-color: rgba(80, 60, 80, 0.08);
+        }
+        .rogue-stat .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #c8a8c8;
+            font-family: 'Courier Prime', monospace;
+        }
+        .rogue-stat .label {
+            font-size: 0.5rem;
+            opacity: 0.4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier Prime', monospace;
+            color: #8a7a8a;
+        }
+        .rogue-stat .icon {
+            font-size: 1.2rem;
+            display: block;
+        }
+
+        .footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.55rem;
+            opacity: 0.1;
+            letter-spacing: 3px;
+            font-family: 'Courier Prime', monospace;
+            position: relative;
+            z-index: 2;
+            color: #4a3a2a;
+        }
+
+        @media (max-width: 640px) {
+            .book { padding: 14px; border-left-width: 8px; }
+            .book::before { left: -8px; width: 8px; }
+            .book-header h1 { font-size: 1.4rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tower-stats { grid-template-columns: repeat(3, 1fr); }
+            .difficulty-progress { grid-template-columns: 1fr 1fr; }
+            .rogue-stats { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .tower-stats { grid-template-columns: 1fr 1fr; }
+            .rogue-stats { grid-template-columns: 1fr 1fr; }
+        }
+
+        ::-webkit-scrollbar { width: 10px; background: #0a0806; }
+        ::-webkit-scrollbar-track { background: #14100c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb {
+            background: #2a1f18;
+            border-radius: 4px;
+            border: 2px solid #1a120e;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #3a2f28; }
+    </style>
+</head>
+<body>
+    <div class="book">
+        <div class="book-border"></div>
+
+        <!-- ===== HEADER ===== -->
+        <div class="book-header">
+            <h1>
+                📊 RECORD BOOK
+                <small>— dark ledger of deeds —</small>
+            </h1>
+            <button class="back-btn" id="backBtn">⬅ Return</button>
+        </div>
+
+        <!-- ===== QUICK STATS ===== -->
+        <div class="section-title">📋 Quick Reference</div>
+        <div class="stats-grid" id="quickStats"></div>
+
+        <!-- ===== TOWER STATS ===== -->
+        <div class="section-title">🏰 Tower Registry</div>
+        <div class="tower-stats" id="towerStats"></div>
+
+        <!-- ===== DIFFICULTY PROGRESS ===== -->
+        <div class="section-title">⚔️ Difficulty Records</div>
+        <div class="difficulty-progress" id="difficultyProgress"></div>
+
+        <!-- ===== ROGUE‑LIKE STATS ===== -->
+        <div class="section-title">🎲 Rogue‑like Log</div>
+        <div class="rogue-stats" id="rogueStats"></div>
+
+        <div class="footer">✧ recorded by the Archivist · all entries verified ✧</div>
+    </div>
+
+    <script>
+        // ================================================================
+        // HELPERS
+        // ================================================================
+        function getData(key, fallback) {
+            const val = localStorage.getItem(key);
+            if (val === null || val === undefined) return fallback;
+            try { return JSON.parse(val); } catch(e) { return val; }
+        }
+        function getInt(key, fallback = 0) {
+            const val = localStorage.getItem(key);
+            if (val === null || val === undefined) return fallback;
+            return parseInt(val) || fallback;
+        }
+
+        // ================================================================
+        // RENDER FUNCTIONS
+        // ================================================================
+
+        function renderQuickStats() {
+            const container = document.getElementById('quickStats');
+            const totalKills = getInt('td_totalKills', 0);
+            const playerLevel = getInt('td_playerLevel', 1);
+            const prestigeLevel = getInt('td_prestigeLevel', 0);
+            const totalGems = getInt('td_totalGems', 1);
+            const shards = getInt('td_shards', 0);
+            const gamesPlayed = getInt('td_gamesPlayed', 0);
+            const totalTowersBuilt = getInt('td_totalTowersBuilt', 0);
+            const totalCoinsEarned = getInt('td_totalCoinsEarned', 0);
+            const heroUnlocked = getData('td_heroUnlocked', { clacks: false, spoder: false, minifun: false, trae: false });
+            const heroCount = Object.values(heroUnlocked).filter(Boolean).length;
+            const totalHeroes = 4;
+
+            const stats = [
+                { icon: '💀', value: totalKills.toLocaleString(), label: 'Total Kills' },
+                { icon: '⭐', value: playerLevel, label: 'Player Level' },
+                { icon: '🏆', value: prestigeLevel, label: 'Prestige' },
+                { icon: '💎', value: totalGems, label: 'Gems' },
+                { icon: '🔮', value: shards, label: 'Shards' },
+                { icon: '🗡️', value: gamesPlayed, label: 'Games Played' },
+                { icon: '🏰', value: totalTowersBuilt, label: 'Towers Built' },
+                { icon: '🪙', value: totalCoinsEarned.toLocaleString(), label: 'Coins Earned' },
+                { icon: '🦸', value: `${heroCount}/${totalHeroes}`, label: 'Heroes Unlocked' },
+            ];
+
+            container.innerHTML = stats.map(s => `
+                <div class="stat-card">
+                    <span class="icon">${s.icon}</span>
+                    <div class="value">${s.value}</div>
+                    <div class="label">${s.label}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderTowerStats() {
+            const container = document.getElementById('towerStats');
+            const towerMaxLevels = getData('td_towerMaxLevels', {});
+            const unlockedTowers = getData('td_unlockedTowers', { archer: true });
+            const towerNames = {
+                archer: '🏹 Archer',
+                bomber: '💣 Bomber',
+                poison: '☠️ Venom',
+                dart: '🎯 Dart',
+                farm: '🌾 Farm',
+                sniper: '🔭 Sniper',
+                mage: '🧙 Mage'
+            };
+            const towerKeys = ['archer', 'bomber', 'poison', 'dart', 'farm', 'sniper', 'mage'];
+
+            container.innerHTML = towerKeys.map(key => {
+                const maxLvl = towerMaxLevels[key] || 1;
+                const unlocked = unlockedTowers[key] || false;
+                return `
+                    <div class="tower-stat ${unlocked ? '' : 'locked-stat'}">
+                        <div class="name">${towerNames[key] || key}</div>
+                        <div class="count">${unlocked ? `Lv ${maxLvl}` : '🔒'}</div>
+                        <div class="sub">${unlocked ? 'Unlocked' : 'Locked'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDifficultyProgress() {
+            const container = document.getElementById('difficultyProgress');
+            const diffLabels = {
+                easy: '🍼 EASY',
+                normal: '🙂 NORMAL',
+                hard: '🔥 HARD',
+                challenger: '🥷 CHALLENGER',
+                death: '💀 DEATH',
+                hell: '👿 HELL',
+                primal: '🦍 PRIMAL'
+            };
+            const diffRecords = getData('td_difficultyWaveRecords', {});
+            const unlockedDiffs = getData('td_unlockedDifficulties', ['easy']);
+            const maxWave = 200;
+
+            container.innerHTML = Object.keys(diffLabels).map(key => {
+                const wave = diffRecords[key] || 0;
+                const unlocked = unlockedDiffs.includes(key);
+                const pct = Math.min(100, (wave / maxWave) * 100);
+                return `
+                    <div class="diff-prog ${unlocked ? 'unlocked' : ''}">
+                        <div class="name">${diffLabels[key]}</div>
+                        <div class="wave">${unlocked ? `Wave ${wave}` : '🔒 Locked'}</div>
+                        <div class="bar"><div class="fill" style="width:${pct}%;${unlocked ? '' : 'opacity:0.3;'}"></div></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRogueStats() {
+            const container = document.getElementById('rogueStats');
+            const runs = getInt('td_rogue_runs', 0);
+            const wins = getInt('td_rogue_wins', 0);
+            const bestWave = getInt('td_rogue_bestWave', 0);
+            const totalUpgrades = getInt('td_rogue_totalUpgrades', 0);
+            const towersUnlocked = getInt('td_rogue_towersUnlocked', 0);
+            const heroesUnlocked = getInt('td_rogue_heroUnlocked', 0);
+            const totalKills = getInt('td_rogue_totalKills', 0);
+            const totalCoins = getInt('td_rogue_totalCoins', 0);
+            const flawless = getInt('td_rogue_flawless', 0);
+            const fastestWin = getInt('td_rogue_fastest_win_time', 0);
+            const archerOnly = getInt('td_rogue_archer_only', 0);
+            const totalRogueGames = getInt('td_rogue_runs', 0);
+
+            const stats = [
+                { icon: '🎲', value: runs, label: 'Runs Started' },
+                { icon: '🏆', value: wins, label: 'Runs Won' },
+                { icon: '🌊', value: bestWave, label: 'Best Wave' },
+                { icon: '🔄', value: totalUpgrades, label: 'Upgrades Taken' },
+                { icon: '🏰', value: towersUnlocked, label: 'Towers Unlocked' },
+                { icon: '🦸', value: heroesUnlocked, label: 'Heroes Unlocked' },
+                { icon: '💀', value: totalKills.toLocaleString(), label: 'Total Kills' },
+                { icon: '🪙', value: totalCoins.toLocaleString(), label: 'Total Coins' },
+                { icon: '✨', value: flawless, label: 'Flawless Runs' },
+                { icon: '⚡', value: fastestWin > 0 ? `${Math.floor(fastestWin / 60)}m ${fastestWin % 60}s` : '—', label: 'Fastest Win' },
+                { icon: '🏹', value: archerOnly, label: 'Archer‑Only Wins' },
+            ];
+
+            container.innerHTML = stats.map(s => `
+                <div class="rogue-stat">
+                    <span class="icon">${s.icon}</span>
+                    <div class="value">${s.value}</div>
+                    <div class="label">${s.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // ================================================================
+        // NAVIGATION
+        // ================================================================
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        renderQuickStats();
+        renderTowerStats();
+        renderDifficultyProgress();
+        renderRogueStats();
+
+        // Auto-refresh every 5 seconds
+        setInterval(() => {
+            renderQuickStats();
+            renderTowerStats();
+            renderDifficultyProgress();
+            renderRogueStats();
+        }, 5000);
+
+        console.log('📊 Dark Stats (record book) with Rogue-like loaded – back to menu');
+    </script>
+</body>
+</html>

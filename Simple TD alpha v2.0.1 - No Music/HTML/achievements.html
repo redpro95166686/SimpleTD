@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Achievements</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            color: #f0ece3;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(8, 18, 22, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            padding: 1.8rem 2rem 2rem;
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        /* -------- FILTER / SORT BAR -------- */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 0.5rem 0 1.2rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 1.2rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .filter-bar label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+            margin-right: 0.2rem;
+        }
+        .filter-bar select {
+            background: rgba(20, 34, 30, 0.6);
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            color: #f0ece3;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            transition: 0.2s;
+        }
+        .filter-bar select:hover {
+            border-color: rgba(244, 162, 97, 0.3);
+        }
+        .filter-bar select option {
+            background: #0a0c16;
+            color: #f0ece3;
+        }
+        .filter-bar .filter-count {
+            font-size: 0.65rem;
+            opacity: 0.4;
+            margin-left: auto;
+        }
+
+        /* -------- PROGRESS BAR -------- */
+        .progress-section {
+            margin: 0.5rem 0 1.2rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 1.2rem;
+            padding: 0.6rem 1rem;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ffecb3;
+            margin-bottom: 0.2rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f4a261, #ffd700);
+            border-radius: 20px;
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
+        /* -------- TROPHY MILESTONES -------- */
+        .trophy-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.4rem 1.2rem;
+            margin: 0.8rem 0 1.2rem;
+            padding: 0.4rem 0.6rem;
+            background: rgba(0,0,0,0.15);
+            border-radius: 1.2rem;
+        }
+        .trophy-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.3;
+            transition: 0.3s;
+            color: #888;
+        }
+        .trophy-item.unlocked {
+            opacity: 1;
+            color: #ffd700;
+            text-shadow: 0 0 12px rgba(255,215,0,0.2);
+        }
+        .trophy-item .trophy-icon {
+            font-size: 1.2rem;
+        }
+        .trophy-item .pct {
+            font-size: 0.65rem;
+            background: rgba(255,255,255,0.06);
+            padding: 0.05rem 0.4rem;
+            border-radius: 20px;
+        }
+        .trophy-item.unlocked .pct {
+            background: rgba(255,215,0,0.12);
+            color: #ffd700;
+        }
+
+        /* -------- GRID -------- */
+        .ach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.8rem;
+        }
+        .ach-card {
+            background: rgba(20, 34, 30, 0.35);
+            border-radius: 1.2rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(80, 180, 140, 0.06);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .ach-card.unlocked {
+            border-color: rgba(255, 215, 0, 0.2);
+            background: rgba(30, 50, 40, 0.35);
+        }
+        .ach-card.locked {
+            opacity: 0.5;
+            filter: grayscale(0.5);
+        }
+        .ach-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(244, 162, 97, 0.15);
+        }
+        .ach-card .ach-icon {
+            font-size: 2rem;
+            width: 48px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .ach-card .ach-info {
+            flex: 1;
+        }
+        .ach-card .ach-info .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .ach-card .ach-info .desc {
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+        .ach-card .ach-status {
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .ach-card.unlocked .ach-status { color: #ffd700; }
+        .ach-card.locked .ach-status { color: #555; }
+
+        .footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.6rem;
+            opacity: 0.25;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            .ach-grid { grid-template-columns: 1fr; }
+            .ach-card { padding: 0.6rem 0.8rem; }
+            .trophy-row { gap: 0.3rem; }
+            .trophy-item { font-size: 0.6rem; }
+            .filter-bar { flex-wrap: wrap; }
+            .filter-bar .filter-count { margin-left: 0; width: 100%; text-align: right; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏆 ACHIEVEMENTS</h1>
+        <span class="progress-text" id="progressText">0 / 0</span>
+        <button class="back-btn" id="backBtn">⬅ BACK</button>
+    </div>
+
+    <!-- Filter / Sort Bar -->
+    <div class="filter-bar">
+        <label for="filterSelect">🔍 Filter:</label>
+        <select id="filterSelect">
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="incomplete">Incomplete</option>
+            <option value="normal">Normal Mode</option>
+            <option value="rogue">Rogue Mode</option>
+            <option value="difficulty">Difficulty Unlocks</option>
+        </select>
+        <span class="filter-count" id="filterCount">0 achievements</span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+        <div class="progress-top">
+            <span>Progress</span>
+            <span id="percentageLabel">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="fill" id="progressFill" style="width:0%;"></div>
+        </div>
+    </div>
+
+    <!-- Trophy Milestones -->
+    <div class="trophy-row" id="trophyRow">
+        <!-- will be filled by JS -->
+    </div>
+
+    <!-- Achievement Grid -->
+    <div class="ach-grid" id="achGrid"></div>
+
+    <div class="footer">🏆 Achievements unlock automatically as you play</div>
+</div>
+
+<script>
+    // ================================================================
+    // ACHIEVEMENT DEFINITIONS (with tags for filtering)
+    // ================================================================
+    const ACHIEVEMENTS = [
+        // -------- NORMAL MODE (original + new) --------
+        { id: 'first_blood', icon: '💀', name: 'First Blood', desc: 'Kill your first enemy', tags: ['normal'], check: () => getInt('td_totalKills') >= 1 },
+        { id: 'wave_10', icon: '🌊', name: 'Wave 10', desc: 'Reach Wave 10', tags: ['normal'], check: () => getWaveBest() >= 10 },
+        { id: 'wave_25', icon: '🌊', name: 'Wave 25', desc: 'Reach Wave 25', tags: ['normal'], check: () => getWaveBest() >= 25 },
+        { id: 'wave_50', icon: '🌊', name: 'Wave 50', desc: 'Reach Wave 50', tags: ['normal'], check: () => getWaveBest() >= 50 },
+        { id: 'wave_100', icon: '🌊', name: 'Wave 100', desc: 'Reach Wave 100', tags: ['normal'], check: () => getWaveBest() >= 100 },
+        { id: 'wave_200', icon: '🌊', name: 'Wave 200', desc: 'Reach Wave 200', tags: ['normal'], check: () => getWaveBest() >= 200 },
+        { id: 'wave_500', icon: '🌊', name: 'Wave 500', desc: 'Reach Wave 500', tags: ['normal'], check: () => getWaveBest() >= 500 },
+        { id: 'boss_cerberus', icon: '🐕', name: 'Cerberus Slayer', desc: 'Defeat Cerberus (Wave 40)', tags: ['normal'], check: () => getWaveBest() >= 40 },
+        { id: 'boss_behemoth', icon: '🐘', name: 'Behemoth Bane', desc: 'Defeat Behemoth (Wave 80)', tags: ['normal'], check: () => getWaveBest() >= 80 },
+        { id: 'boss_titan', icon: '👑', name: 'Titan Slayer', desc: 'Defeat Titan (Wave 100)', tags: ['normal'], check: () => getWaveBest() >= 100 },
+        { id: 'tower_collector', icon: '🏰', name: 'Tower Collector', desc: 'Unlock all 7 towers', tags: ['normal'], check: () => { const t = getData('td_unlockedTowers', {}); return Object.values(t).filter(Boolean).length >= 7; } },
+        { id: 'master_builder', icon: '🔨', name: 'Master Builder', desc: 'Build 100 towers total', tags: ['normal'], check: () => getInt('td_totalTowersBuilt') >= 100 },
+        { id: 'master_builder_500', icon: '🔨', name: 'Grand Builder', desc: 'Build 500 towers total', tags: ['normal'], check: () => getInt('td_totalTowersBuilt') >= 500 },
+        { id: 'master_builder_1000', icon: '🔨', name: 'Legendary Builder', desc: 'Build 1000 towers total', tags: ['normal'], check: () => getInt('td_totalTowersBuilt') >= 1000 },
+        { id: 'heroic', icon: '🦸', name: 'Heroic', desc: 'Place your first hero', tags: ['normal'], check: () => getInt('td_heroPlaced') >= 1 },
+        { id: 'all_heroes', icon: '⭐', name: 'All Heroes', desc: 'Unlock all 4 heroes', tags: ['normal'], check: () => { const h = getData('td_heroUnlocked', {}); return Object.values(h).filter(Boolean).length >= 4; } },
+        { id: 'prestige_1', icon: '🌟', name: 'Prestige 1', desc: 'Reach Prestige 1', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 1 },
+        { id: 'prestige_5', icon: '🌟', name: 'Prestige 5', desc: 'Reach Prestige 5', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 5 },
+        { id: 'prestige_10', icon: '🌟', name: 'Prestige 10', desc: 'Reach Prestige 10', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 10 },
+        { id: 'prestige_25', icon: '🌟', name: 'Prestige 25', desc: 'Reach Prestige 25', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 25 },
+        { id: 'prestige_50', icon: '🌟', name: 'Prestige 50', desc: 'Reach Prestige 50', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 50 },
+        { id: 'prestige_100', icon: '🌟', name: 'Prestige 100', desc: 'Reach Prestige 100', tags: ['normal', 'prestige'], check: () => getInt('td_prestigeLevel') >= 100 },
+        { id: 'millionaire', icon: '💰', name: 'Millionaire', desc: 'Earn 1,000,000 total coins', tags: ['normal'], check: () => getInt('td_totalCoinsEarned') >= 1000000 },
+        { id: 'ten_millionaire', icon: '💰', name: 'Ten Millionaire', desc: 'Earn 10,000,000 total coins', tags: ['normal'], check: () => getInt('td_totalCoinsEarned') >= 10000000 },
+        { id: 'gem_hoarder', icon: '💎', name: 'Gem Hoarder', desc: 'Collect 100 gems total', tags: ['normal'], check: () => getInt('td_totalGems') >= 100 },
+        { id: 'gem_master', icon: '💎', name: 'Gem Master', desc: 'Collect 1000 gems total', tags: ['normal'], check: () => getInt('td_totalGems') >= 1000 },
+        { id: 'shard_collector', icon: '🔮', name: 'Shard Collector', desc: 'Collect 50 shards', tags: ['normal'], check: () => getInt('td_shards') >= 50 },
+        { id: 'shard_master', icon: '🔮', name: 'Shard Master', desc: 'Collect 500 shards', tags: ['normal'], check: () => getInt('td_shards') >= 500 },
+        { id: 'tower_upgrade_1', icon: '⬆️', name: 'First Upgrade', desc: 'Buy any tower upgrade (Skill Tree)', tags: ['normal'], check: () => { const upg = getData('td_towerUpgrades', {}); for (let key in upg) { if (upg[key].some(v => v === true)) return true; } return false; } },
+        { id: 'tower_upgrade_all', icon: '🏅', name: 'Skill Tree Master', desc: 'Unlock all tower upgrades for all towers', tags: ['normal'], check: () => { const upg = getData('td_towerUpgrades', {}); const allKeys = ['archer','bomber','poison','dart','farm','sniper','mage']; for (let key of allKeys) { if (!upg[key] || !upg[key].every(v => v === true)) return false; } return true; } },
+        { id: 'knowledge_all', icon: '📜', name: 'Knowledge Seeker', desc: 'Unlock all Knowledge upgrades', tags: ['normal'], check: () => { const k = getData('td_knowledgeUpgrades', {}); return k.archery && k.serpants && k.heroesChant && k.heroesWallet; } },
+        { id: 'difficulty_master', icon: '⚔️', name: 'Difficulty Master', desc: 'Unlock all difficulties', tags: ['normal', 'difficulty'], check: () => { const d = getData('td_unlockedDifficulties', ['easy']); return d.length >= 7; } },
+        { id: 'primal_survivor', icon: '🦍', name: 'Primal Survivor', desc: 'Reach Wave 100 on Primal difficulty', tags: ['normal', 'difficulty'], check: () => { const r = getData('td_difficultyWaveRecords', {}); return (r.primal || 0) >= 100; } },
+        { id: 'hell_survivor', icon: '👿', name: 'Hell Survivor', desc: 'Reach Wave 80 on Hell difficulty', tags: ['normal', 'difficulty'], check: () => { const r = getData('td_difficultyWaveRecords', {}); return (r.hell || 0) >= 80; } },
+        { id: 'death_survivor', icon: '💀', name: 'Death Survivor', desc: 'Reach Wave 60 on Death difficulty', tags: ['normal', 'difficulty'], check: () => { const r = getData('td_difficultyWaveRecords', {}); return (r.death || 0) >= 60; } },
+        { id: 'challenger_survivor', icon: '🥷', name: 'Challenger Survivor', desc: 'Reach Wave 40 on Challenger difficulty', tags: ['normal', 'difficulty'], check: () => { const r = getData('td_difficultyWaveRecords', {}); return (r.challenger || 0) >= 40; } },
+
+        // -------- ROGUE‑LIKE ACHIEVEMENTS --------
+        // Participation
+        { id: 'rogue_initiate', icon: '🎲', name: 'Rogue Initiate', desc: 'Start your first Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_runs') >= 1 },
+        { id: 'rogue_enthusiast', icon: '🎯', name: 'Rogue Enthusiast', desc: 'Start 10 Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_runs') >= 10 },
+        { id: 'rogue_addict', icon: '🔥', name: 'Rogue Addict', desc: 'Start 50 Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_runs') >= 50 },
+        // Wave progression
+        { id: 'rogue_wave_5', icon: '5️⃣', name: 'Rogue Wave 5', desc: 'Reach Wave 5 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 5 },
+        { id: 'rogue_wave_10', icon: '🔟', name: 'Rogue Wave 10', desc: 'Reach Wave 10 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 10 },
+        { id: 'rogue_wave_20', icon: '🏹', name: 'Rogue Wave 20', desc: 'Reach Wave 20 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 20 },
+        { id: 'rogue_wave_30', icon: '⚡', name: 'Rogue Wave 30', desc: 'Reach Wave 30 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 30 },
+        { id: 'rogue_wave_40', icon: '🐕', name: 'Rogue Wave 40', desc: 'Defeat Cerberus in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 40 },
+        { id: 'rogue_wave_50', icon: '🏅', name: 'Rogue Wave 50', desc: 'Reach Wave 50 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 50 },
+        { id: 'rogue_wave_60', icon: '💪', name: 'Rogue Wave 60', desc: 'Reach Wave 60 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 60 },
+        { id: 'rogue_wave_70', icon: '🔥', name: 'Rogue Wave 70', desc: 'Reach Wave 70 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 70 },
+        { id: 'rogue_wave_80', icon: '🐘', name: 'Rogue Wave 80', desc: 'Defeat Behemoth in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 80 },
+        { id: 'rogue_wave_90', icon: '🌟', name: 'Rogue Wave 90', desc: 'Reach Wave 90 in Rogue‑like', tags: ['rogue'], check: () => getInt('td_rogue_bestWave') >= 90 },
+        { id: 'rogue_master', icon: '👑', name: 'Rogue Master', desc: 'Win a Rogue‑like run (Wave 100)', tags: ['rogue'], check: () => getInt('td_rogue_wins') >= 1 },
+        // Wins
+        { id: 'rogue_winner', icon: '🏆', name: 'Rogue Winner', desc: 'Win 1 Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_wins') >= 1 },
+        { id: 'rogue_champion', icon: '🥇', name: 'Rogue Champion', desc: 'Win 5 Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_wins') >= 5 },
+        { id: 'rogue_legend', icon: '⭐', name: 'Rogue Legend', desc: 'Win 10 Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_wins') >= 10 },
+        // Tower unlocks (cumulative across runs)
+        { id: 'rogue_unlock_bomber', icon: '💣', name: 'Unlock Bomber', desc: 'Unlock Bomber in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 1 },
+        { id: 'rogue_unlock_poison', icon: '☠️', name: 'Unlock Venom', desc: 'Unlock Venom in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 2 },
+        { id: 'rogue_unlock_dart', icon: '🎯', name: 'Unlock Dart', desc: 'Unlock Dart in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 3 },
+        { id: 'rogue_unlock_farm', icon: '🌾', name: 'Unlock Farm', desc: 'Unlock Farm in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 4 },
+        { id: 'rogue_unlock_sniper', icon: '🔭', name: 'Unlock Sniper', desc: 'Unlock Sniper in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 5 },
+        { id: 'rogue_unlock_mage', icon: '🧙', name: 'Unlock Mage', desc: 'Unlock Mage in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 6 },
+        { id: 'rogue_all_towers', icon: '🏰', name: 'All Towers in Rogue', desc: 'Unlock all 6 towers in a single Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_towersUnlocked') >= 6 },
+        // Hero unlocks (cumulative across runs)
+        { id: 'rogue_hero_clacks', icon: '🕷️', name: 'Unlock Clacks', desc: 'Unlock Clacks in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_heroUnlocked') >= 1 },
+        { id: 'rogue_hero_spoder', icon: '🕸️', name: 'Unlock Spoder', desc: 'Unlock Spoder in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_heroUnlocked') >= 2 },
+        { id: 'rogue_hero_minifun', icon: '🎯', name: 'Unlock Mini Fun', desc: 'Unlock Mini Fun in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_heroUnlocked') >= 3 },
+        { id: 'rogue_hero_trae', icon: '🌳', name: 'Unlock Trae', desc: 'Unlock Trae in any Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_heroUnlocked') >= 4 },
+        { id: 'rogue_all_heroes', icon: '⭐', name: 'All Heroes in Rogue', desc: 'Unlock all 4 heroes in a single Rogue‑like run', tags: ['rogue'], check: () => getInt('td_rogue_heroUnlocked') >= 4 },
+        // Upgrades
+        { id: 'rogue_upgrade_5', icon: '5️⃣', name: '5 Upgrades', desc: 'Take 5 total upgrades across all Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_totalUpgrades') >= 5 },
+        { id: 'rogue_upgrade_10', icon: '🔟', name: '10 Upgrades', desc: 'Take 10 total upgrades across all Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_totalUpgrades') >= 10 },
+        { id: 'rogue_upgrade_25', icon: '⚡', name: '25 Upgrades', desc: 'Take 25 total upgrades across all Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_totalUpgrades') >= 25 },
+        { id: 'rogue_upgrade_50', icon: '🏅', name: '50 Upgrades', desc: 'Take 50 total upgrades across all Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_totalUpgrades') >= 50 },
+        { id: 'rogue_upgrade_100', icon: '💎', name: '100 Upgrades', desc: 'Take 100 total upgrades across all Rogue‑like runs', tags: ['rogue'], check: () => getInt('td_rogue_totalUpgrades') >= 100 },
+        // Special
+        { id: 'rogue_flawless', icon: '✨', name: 'Flawless Rogue', desc: 'Win a Rogue‑like run without losing a life', tags: ['rogue'], check: () => getInt('td_rogue_flawless') >= 1 },
+        { id: 'rogue_speedster', icon: '⚡', name: 'Rogue Speedster', desc: 'Win a Rogue‑like run in under 30 minutes', tags: ['rogue'], check: () => { const t = getInt('td_rogue_fastest_win_time'); return t > 0 && t <= 1800; } },
+        { id: 'rogue_kills_100', icon: '💀', name: '100 Rogue Kills', desc: 'Kill 100 enemies in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalKills') >= 100 },
+        { id: 'rogue_kills_1000', icon: '💀', name: '1000 Rogue Kills', desc: 'Kill 1000 enemies in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalKills') >= 1000 },
+        { id: 'rogue_kills_10000', icon: '💀', name: '10000 Rogue Kills', desc: 'Kill 10000 enemies in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalKills') >= 10000 },
+        { id: 'rogue_coins_10000', icon: '🪙', name: '10k Rogue Coins', desc: 'Earn 10,000 coins in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalCoins') >= 10000 },
+        { id: 'rogue_coins_100000', icon: '🪙', name: '100k Rogue Coins', desc: 'Earn 100,000 coins in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalCoins') >= 100000 },
+        { id: 'rogue_coins_1000000', icon: '🪙', name: '1M Rogue Coins', desc: 'Earn 1,000,000 coins in Rogue‑like mode (cumulative)', tags: ['rogue'], check: () => getInt('td_rogue_totalCoins') >= 1000000 },
+        { id: 'rogue_archer_only', icon: '🏹', name: 'Archer Only', desc: 'Win a Rogue‑like run using only Archers', tags: ['rogue'], check: () => getInt('td_rogue_archer_only') >= 1 },
+    ];
+
+    // ================================================================
+    // HELPERS
+    // ================================================================
+    function getData(key, fallback) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        try { return JSON.parse(val); } catch(e) { return val; }
+    }
+    function getInt(key, fallback = 0) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        return parseInt(val) || fallback;
+    }
+    function getWaveBest() {
+        const records = getData('td_difficultyWaveRecords', {});
+        let best = 0;
+        for (let key in records) {
+            if (records[key] > best) best = records[key];
+        }
+        return best;
+    }
+
+    // ================================================================
+    // LOAD / CHECK ACHIEVEMENTS
+    // ================================================================
+    function checkAchievements() {
+        const unlocked = getData('td_achievements', {});
+        let total = ACHIEVEMENTS.length;
+        let count = 0;
+
+        ACHIEVEMENTS.forEach(ach => {
+            const isUnlocked = unlocked[ach.id] || false;
+            if (isUnlocked) count++;
+        });
+
+        let changed = false;
+        ACHIEVEMENTS.forEach(ach => {
+            if (!unlocked[ach.id] && ach.check()) {
+                unlocked[ach.id] = true;
+                changed = true;
+                console.log(`🏆 Achievement Unlocked: ${ach.name}!`);
+            }
+        });
+
+        if (changed) {
+            localStorage.setItem('td_achievements', JSON.stringify(unlocked));
+        }
+
+        return { unlocked, total, count };
+    }
+
+    // ================================================================
+    // FILTER & RENDER
+    // ================================================================
+    let currentFilter = 'all';
+
+    function getFilteredAchievements(unlocked) {
+        const filter = document.getElementById('filterSelect').value;
+        currentFilter = filter;
+        let filtered = ACHIEVEMENTS.filter(ach => {
+            const isUnlocked = unlocked[ach.id] || false;
+            // Filter by status
+            if (filter === 'completed' && !isUnlocked) return false;
+            if (filter === 'incomplete' && isUnlocked) return false;
+            // Filter by mode
+            if (filter === 'normal' && !ach.tags.includes('normal')) return false;
+            if (filter === 'rogue' && !ach.tags.includes('rogue')) return false;
+            if (filter === 'difficulty' && !ach.tags.includes('difficulty')) return false;
+            return true;
+        });
+        return filtered;
+    }
+
+    function renderAchievements() {
+        const { unlocked, total, count } = checkAchievements();
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+
+        // Update progress bar (global)
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('percentageLabel').textContent = pct + '%';
+        document.getElementById('progressText').textContent = `${count} / ${total}`;
+
+        // Trophy milestones (global)
+        const milestones = [10, 25, 33, 50, 65, 75, 90, 95, 100];
+        const trophyRow = document.getElementById('trophyRow');
+        trophyRow.innerHTML = '';
+        milestones.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'trophy-item' + (pct >= m ? ' unlocked' : '');
+            div.innerHTML = `
+                <span class="trophy-icon">${pct >= m ? '🏆' : '🏅'}</span>
+                <span class="pct">${m}%</span>
+            `;
+            trophyRow.appendChild(div);
+        });
+
+        // Filtered achievements
+        const filtered = getFilteredAchievements(unlocked);
+        const filteredCount = filtered.length;
+        const filteredUnlocked = filtered.filter(ach => unlocked[ach.id] || false).length;
+        document.getElementById('filterCount').textContent = `${filteredUnlocked} / ${filteredCount} achievements`;
+
+        // Grid
+        const grid = document.getElementById('achGrid');
+        grid.innerHTML = '';
+        filtered.forEach(ach => {
+            const isUnlocked = unlocked[ach.id] || false;
+            const card = document.createElement('div');
+            card.className = `ach-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            card.innerHTML = `
+                <div class="ach-icon">${ach.icon}</div>
+                <div class="ach-info">
+                    <div class="name">${ach.name}</div>
+                    <div class="desc">${ach.desc}</div>
+                </div>
+                <div class="ach-status">${isUnlocked ? '✅' : '🔒'}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // ================================================================
+    // EVENT LISTENERS
+    // ================================================================
+    document.getElementById('filterSelect').addEventListener('change', renderAchievements);
+
+    // ================================================================
+    // NAVIGATION – BACK TO MENU
+    // ================================================================
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+    });
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    renderAchievements();
+    setInterval(renderAchievements, 5000);
+
+    console.log('🏆 Achievements page loaded (with filters & new normal achievements)');
+</script>
+</body>
+</html>

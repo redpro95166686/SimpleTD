@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎲 Rogue‑like TD</title>
+    <style>
+        /* ========== ALL STYLES FROM game.html (same as before) ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0c16; font-family: 'Inter', system-ui, sans-serif; height: 100vh; overflow: hidden; color: #f0ece3; }
+        .canvas-wrapper { position: relative; width: 100vw; height: 100vh; background: #030b07; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        canvas { display: block; background: #1c3b2f; cursor: crosshair; border-radius: 0; image-rendering: pixelated; }
+
+        .hamburger-btn { position: absolute; top: 16px; left: 16px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; cursor: pointer; z-index: 20; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 6px; transition: 0.2s; }
+        .hamburger-btn:hover { background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.15); }
+        .hamburger-btn .line { width: 22px; height: 2px; background: #f0ece3; border-radius: 2px; transition: 0.2s; }
+        .hamburger-btn .line.middle { width: 16px; align-self: flex-start; margin-left: 6px; }
+
+        .dropdown { position: absolute; top: 64px; left: 16px; background: rgba(8,18,22,0.92); backdrop-filter: blur(16px); border: 1px solid rgba(80,180,140,0.2); border-radius: 12px; padding: 6px; z-index: 20; min-width: 160px; display: none; flex-direction: column; gap: 2px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+        .dropdown.open { display: flex; }
+        .dropdown-item { padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #f0ece3; transition: 0.15s; display: flex; align-items: center; gap: 8px; border: none; background: transparent; width: 100%; text-align: left; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+        .dropdown-item:active { transform: scale(0.97); }
+        .dropdown-item .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+        .dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 8px; }
+
+        .canvas-stats-overlay { position: absolute; top: 16px; left: 70px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 40px; font-size: 0.75rem; font-weight: bold; color: #ffecb3; display: flex; gap: 14px; z-index: 10; pointer-events: none; font-family: monospace; flex-wrap: wrap; }
+        .canvas-stats-overlay span { display: inline-flex; align-items: center; gap: 4px; }
+        .level-progress { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 40px; font-size: 0.7rem; color: #ffecb3; display: flex; align-items: center; gap: 8px; z-index: 10; pointer-events: none; font-family: monospace; }
+        .level-progress .track { width: 70px; height: 4px; background: #2a3a2a; border-radius: 2px; overflow: hidden; }
+        .level-progress .fill { height: 100%; background: #ffd700; width: 0%; transition: width 0.1s; }
+
+        .tower-sidebar {
+            position: fixed;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(8,18,22,0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(80,180,140,0.2);
+            border-radius: 12px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 15;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            max-height: 90vh;
+            overflow-y: auto;
+            min-width: 70px;
+            align-items: center;
+            pointer-events: auto;
+        }
+        .tower-sidebar::-webkit-scrollbar { width: 3px; }
+        .tower-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+
+        .tower-slot {
+            width: 60px;
+            padding: 4px 2px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: grab;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+            position: relative;
+            background: rgba(255,255,255,0.04);
+            color: #f0ece3;
+            font-size: 0.55rem;
+            font-weight: 600;
+            user-select: none;
+            text-align: center;
+            min-height: 64px;
+            justify-content: center;
+        }
+        .tower-slot:hover { background: rgba(255,255,255,0.08); }
+        .tower-slot.selected { border-color: #ffd700; background: rgba(255,215,0,0.08); }
+        .tower-slot.locked { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.6); }
+        .tower-slot.locked .tower-icon { filter: grayscale(1); }
+        .tower-slot .tower-icon {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 2px;
+            image-rendering: pixelated;
+        }
+        .tower-slot .tower-cost { font-size: 0.5rem; opacity: 0.7; margin-top: 1px; }
+        .tower-slot .indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        .indicator.green { background: #4eff6e; box-shadow: 0 0 6px rgba(78,255,110,0.5); }
+        .indicator.red { background: #ff4444; box-shadow: 0 0 6px rgba(255,68,68,0.4); }
+        .indicator.locked-indicator { background: transparent; border: none; font-size: 0.7rem; line-height: 1; top: 0; right: 0; }
+
+        .tower-slot.dragging { opacity: 0.3; }
+
+        .tower-popup { position: fixed; background: rgba(8,18,22,0.95); backdrop-filter: blur(18px); border: 1px solid rgba(244,162,97,0.2); border-radius: 1.2rem; padding: 12px 16px; min-width: 150px; z-index: 90; box-shadow: 0 16px 48px rgba(0,0,0,0.7); pointer-events: auto; color: #f0ece3; font-size: 0.8rem; line-height: 1.5; animation: selectorPop 0.15s ease-out; }
+        .tower-popup .popup-close { position: absolute; top: 6px; right: 10px; cursor: pointer; opacity: 0.4; font-size: 0.9rem; transition: 0.15s; }
+        .tower-popup .popup-close:hover { opacity: 1; transform: rotate(90deg); }
+        .tower-popup .popup-btn { display: inline-block; background: rgba(42,75,62,0.5); border: 1px solid rgba(80,180,140,0.12); border-radius: 0.6rem; padding: 2px 12px; font-size: 0.7rem; font-weight: 600; color: #f0ece3; cursor: pointer; transition: 0.12s; margin: 2px 2px 0 0; user-select: none; }
+        .tower-popup .popup-btn:hover { background: rgba(74,110,60,0.7); border-color: rgba(244,162,97,0.3); }
+        .tower-popup .popup-btn:active { transform: scale(0.95); }
+        .tower-popup .popup-sell { background: rgba(80,30,30,0.4); border-color: rgba(200,80,50,0.15); }
+        .tower-popup .popup-sell:hover { background: rgba(120,40,40,0.6); }
+
+        .coin-popup { position: fixed; font-weight: bold; font-size: 1rem; color: #ffdd88; text-shadow: 0 0 12px rgba(255,220,100,0.3); pointer-events: none; z-index: 400; animation: coinFloat 0.6s ease-out forwards; }
+        @keyframes coinFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.2); } }
+        @keyframes farmGlow { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.4) translateY(-20px); } }
+
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 40; display: none; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: linear-gradient(145deg,#10231e,#07120f); border-radius: 2rem; padding: 1.5rem; max-width: 600px; width: 90%; border: 2px solid #f4a261; color: #f0f0e0; max-height: 80vh; overflow-y: auto; }
+        .modal-box h2 { text-align: center; color: #ffcd94; margin-bottom: 1rem; }
+        .diff-option { background: #16221e; border-radius: 1rem; padding: 0.8rem; margin-bottom: 0.8rem; border: 1px solid #3a5a4a; cursor: pointer; transition: 0.15s; }
+        .diff-option:hover { border-color: #f4a261; background: #1e2e2a; }
+        .diff-option.selected { border-color: #ffd700; background: #1a2a1a; }
+        .diff-option .name { font-weight: bold; font-size: 1.1rem; }
+        .diff-option .desc { font-size: 0.8rem; opacity: 0.85; }
+        .diff-option .unlock { font-size: 0.7rem; opacity: 0.6; }
+        .diff-option.locked { opacity: 0.5; cursor: not-allowed; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+        .modal-actions button { padding: 0.5rem 2rem; border-radius: 40px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-cancel { background: #6e2f2f; color: #f9e6cf; }
+        .btn-confirm { background: #4a6e3c; color: #f9e6cf; }
+
+        .rogue-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .rogue-modal .rogue-box {
+            background: linear-gradient(145deg, #1a2e28, #0b1a16);
+            border-radius: 2.5rem;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            border: 2px solid #f4a261;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            color: #f0ece3;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .rogue-modal .rogue-box h2 {
+            text-align: center;
+            color: #ffcd94;
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+        .rogue-modal .rogue-box .sub {
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin-bottom: 1.5rem;
+        }
+        .rogue-modal .upgrade-option {
+            background: rgba(42,75,62,0.3);
+            border: 2px solid rgba(80,180,140,0.15);
+            border-radius: 1.2rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .rogue-modal .upgrade-option:hover {
+            border-color: #f4a261;
+            background: rgba(42,75,62,0.6);
+            transform: scale(1.01);
+        }
+        .rogue-modal .upgrade-option:active { transform: scale(0.97); }
+        .rogue-modal .upgrade-option .icon { font-size: 2.4rem; width: 56px; text-align: center; flex-shrink: 0; }
+        .rogue-modal .upgrade-option .info .name { font-weight: 600; font-size: 1rem; }
+        .rogue-modal .upgrade-option .info .desc { font-size: 0.7rem; opacity: 0.5; }
+        .rogue-modal .rogue-footer {
+            text-align: center;
+            font-size: 0.6rem;
+            opacity: 0.3;
+            margin-top: 1rem;
+        }
+
+        @keyframes fadeIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+
+        @media (max-width: 700px) {
+            .hamburger-btn { top: 10px; left: 10px; width: 34px; height: 34px; }
+            .hamburger-btn .line { width: 18px; }
+            .hamburger-btn .line.middle { width: 14px; margin-left: 4px; }
+            .dropdown { top: 52px; left: 10px; min-width: 140px; }
+            .canvas-stats-overlay { font-size: 0.6rem; padding: 3px 10px; gap: 8px; top: 10px; left: 56px; }
+            .level-progress { font-size: 0.6rem; padding: 3px 10px; top: 10px; right: 10px; }
+            .level-progress .track { width: 50px; }
+            .tower-sidebar { right: 4px; padding: 6px 4px; min-width: 54px; }
+            .tower-slot { width: 48px; min-height: 52px; }
+            .tower-slot .tower-icon { width: 36px; height: 36px; }
+            .tower-slot .tower-cost { font-size: 0.4rem; }
+            .tower-slot .indicator { width: 10px; height: 10px; top: 1px; right: 1px; }
+            .indicator.locked-indicator { font-size: 0.5rem; }
+        }
+        @media (max-width: 500px) {
+            .canvas-stats-overlay { font-size: 0.5rem; padding: 2px 8px; gap: 4px; top: 8px; left: 50px; }
+            .level-progress { font-size: 0.5rem; padding: 2px 8px; top: 8px; right: 8px; }
+            .level-progress .track { width: 40px; }
+            .tower-sidebar { right: 2px; padding: 4px 2px; min-width: 44px; gap: 4px; }
+            .tower-slot { width: 40px; min-height: 44px; }
+            .tower-slot .tower-icon { width: 30px; height: 30px; }
+            .tower-slot .tower-cost { display: none; }
+            .tower-slot .indicator { width: 8px; height: 8px; top: 0; right: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="canvas-wrapper">
+
+    <!-- CANVAS -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- TOWER SIDEBAR -->
+    <div class="tower-sidebar" id="towerSidebar"></div>
+
+    <!-- HAMBURGER MENU -->
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+        <span class="line"></span>
+        <span class="line middle"></span>
+        <span class="line"></span>
+    </button>
+
+    <!-- DROPDOWN -->
+    <div class="dropdown" id="dropdownMenu">
+        <button class="dropdown-item" id="pauseItem"><span class="icon">⏸️</span> Pause</button>
+        <button class="dropdown-item" id="musicItem"><span class="icon">🎵</span> Music</button>
+        <button class="dropdown-item" id="forceWaveItem"><span class="icon">⚔️</span> Force Wave</button>
+        <button class="dropdown-item" id="turboItem"><span class="icon">⏩</span> Toggle Turbo</button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" id="menuItem"><span class="icon">🏠</span> Menu</button>
+    </div>
+
+    <!-- STATS OVERLAY -->
+    <div class="canvas-stats-overlay">
+        <span>❤️ <span id="canvasLives">20</span></span>
+        <span>🌊 <span id="canvasWave">0</span></span>
+        <span>🪙 <span id="canvasCoin">480</span></span>
+        <span>💀 <span id="canvasKills">0</span></span>
+        <span id="heroDisplay" style="display:none;">🦸 <span id="heroNameDisplay"></span></span>
+        <span id="rogueUpgradeCounter" style="color:#ffd700;">🎲 Next: 5</span>
+    </div>
+
+    <!-- LEVEL PROGRESS -->
+    <div class="level-progress">
+        <span id="levelDisplay">Lv.1</span>
+        <span class="track"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
+        <span id="levelKillDisplay">0 / 300</span>
+    </div>
+
+    <!-- DIFFICULTY MODAL (disabled in rogue) -->
+    <div class="modal-overlay" id="difficultyModal" style="display:none;">
+        <div class="modal-box">
+            <h2>⚔️ Difficulty</h2>
+            <div id="difficultyOptions"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="diffModalCancel">Cancel</button>
+                <button class="btn-confirm" id="diffModalConfirm">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ================================================================
+    // ROGUE‑LIKE UPGRADE SYSTEM
+    // ================================================================
+
+    // ---- Run state (fresh each run) ----
+    let rogueUpgrades = {
+        towerDamageMult: {},
+        towerRangeMult: {},
+        towerCooldownMult: {},
+        farmIncomeMult: 1,
+        globalCoinMult: 1,
+        globalDamageMult: 1,
+        globalRangeMult: 1,
+        extraLives: 0,
+        towerMaxLevelBonus: {},
+        runUnlockedTowers: ['archer'], // only archer at start
+        runHeroUnlocked: { clacks: false, spoder: false, minifun: false, trae: false },
+        runSelectedHero: null,
+        runTowerMaxLevels: {} // will be initialized for all towers to 1
+    };
+
+    // ---- Upgrade pool ----
+    // We'll include tower unlocks, max level +1, tower buffs, global buffs, and hero unlocks (rare)
+    const UPGRADE_POOL = [
+        // Tower unlocks (always available if not already unlocked)
+        { type: 'unlockTower', tower: 'bomber', label: 'Unlock Bomber', icon: '💣', rarity: 'common' },
+        { type: 'unlockTower', tower: 'poison', label: 'Unlock Venom', icon: '☠️', rarity: 'common' },
+        { type: 'unlockTower', tower: 'dart', label: 'Unlock Dart', icon: '🎯', rarity: 'common' },
+        { type: 'unlockTower', tower: 'farm', label: 'Unlock Farm', icon: '🌾', rarity: 'common' },
+        { type: 'unlockTower', tower: 'sniper', label: 'Unlock Sniper', icon: '🔭', rarity: 'common' },
+        { type: 'unlockTower', tower: 'mage', label: 'Unlock Mage', icon: '🧙', rarity: 'common' },
+        // Max level +1 (for each tower)
+        { type: 'maxLevel', tower: 'archer', label: 'Archer Max Level +1', icon: '🏹', rarity: 'common' },
+        { type: 'maxLevel', tower: 'bomber', label: 'Bomber Max Level +1', icon: '💣', rarity: 'common' },
+        { type: 'maxLevel', tower: 'poison', label: 'Venom Max Level +1', icon: '☠️', rarity: 'common' },
+        { type: 'maxLevel', tower: 'dart', label: 'Dart Max Level +1', icon: '🎯', rarity: 'common' },
+        { type: 'maxLevel', tower: 'farm', label: 'Farm Max Level +1', icon: '🌾', rarity: 'common' },
+        { type: 'maxLevel', tower: 'sniper', label: 'Sniper Max Level +1', icon: '🔭', rarity: 'common' },
+        { type: 'maxLevel', tower: 'mage', label: 'Mage Max Level +1', icon: '🧙', rarity: 'common' },
+        // Tower buffs
+        { type: 'towerBuff', tower: 'archer', stat: 'damage', value: 0.2, label: 'Archer +20% Damage', icon: '🏹', rarity: 'common' },
+        { type: 'towerBuff', tower: 'archer', stat: 'range', value: 0.15, label: 'Archer +15% Range', icon: '🏹', rarity: 'common' },
+        { type: 'towerBuff', tower: 'archer', stat: 'cooldown', value: 0.15, label: 'Archer +15% Fire Rate', icon: '🏹', rarity: 'common' },
+        { type: 'towerBuff', tower: 'bomber', stat: 'damage', value: 0.25, label: 'Bomber +25% Damage', icon: '💣', rarity: 'common' },
+        { type: 'towerBuff', tower: 'bomber', stat: 'range', value: 0.2, label: 'Bomber +20% Range', icon: '💣', rarity: 'common' },
+        { type: 'towerBuff', tower: 'poison', stat: 'damage', value: 0.3, label: 'Venom +30% Aura Damage', icon: '☠️', rarity: 'common' },
+        { type: 'towerBuff', tower: 'poison', stat: 'range', value: 0.2, label: 'Venom +20% Aura Range', icon: '☠️', rarity: 'common' },
+        { type: 'towerBuff', tower: 'dart', stat: 'damage', value: 0.2, label: 'Dart +20% Damage', icon: '🎯', rarity: 'common' },
+        { type: 'towerBuff', tower: 'dart', stat: 'cooldown', value: 0.15, label: 'Dart +15% Fire Rate', icon: '🎯', rarity: 'common' },
+        { type: 'towerBuff', tower: 'farm', stat: 'income', value: 0.25, label: 'Farm +25% Income', icon: '🌾', rarity: 'common' },
+        { type: 'towerBuff', tower: 'sniper', stat: 'damage', value: 0.3, label: 'Sniper +30% Damage', icon: '🔭', rarity: 'common' },
+        { type: 'towerBuff', tower: 'mage', stat: 'damage', value: 0.2, label: 'Mage +20% Damage', icon: '🧙', rarity: 'common' },
+        { type: 'towerBuff', tower: 'mage', stat: 'cooldown', value: 0.15, label: 'Mage +15% Fire Rate', icon: '🧙', rarity: 'common' },
+        // Global buffs
+        { type: 'globalBuff', stat: 'coinMult', value: 0.15, label: '+15% Coin Gain', icon: '🪙', rarity: 'common' },
+        { type: 'globalBuff', stat: 'damageMult', value: 0.1, label: 'All Towers +10% Damage', icon: '⚔️', rarity: 'common' },
+        { type: 'globalBuff', stat: 'rangeMult', value: 0.1, label: 'All Towers +10% Range', icon: '📡', rarity: 'common' },
+        { type: 'globalBuff', stat: 'extraLives', value: 2, label: '+2 Starting Lives', icon: '❤️', rarity: 'common' },
+        // Hero unlocks (rare)
+        { type: 'unlockHero', hero: 'clacks', label: 'Unlock Hero: Clacks', icon: '🕷️', rarity: 'rare' },
+        { type: 'unlockHero', hero: 'spoder', label: 'Unlock Hero: Spoder', icon: '🕸️', rarity: 'rare' },
+        { type: 'unlockHero', hero: 'minifun', label: 'Unlock Hero: Mini Fun', icon: '🎯', rarity: 'rare' },
+        { type: 'unlockHero', hero: 'trae', label: 'Unlock Hero: Trae', icon: '🌳', rarity: 'rare' },
+    ];
+
+    // ---- Helper to get upgrades with rarity weighting ----
+    function getRandomUpgrades(count = 3) {
+        // Filter based on current state
+        let available = UPGRADE_POOL.filter(upg => {
+            if (upg.type === 'unlockTower') {
+                if (rogueUpgrades.runUnlockedTowers.includes(upg.tower)) return false;
+                return true;
+            }
+            if (upg.type === 'maxLevel') {
+                // Always available
+                return true;
+            }
+            if (upg.type === 'towerBuff') {
+                // Only if tower is unlocked
+                if (!rogueUpgrades.runUnlockedTowers.includes(upg.tower)) return false;
+                return true;
+            }
+            if (upg.type === 'globalBuff') return true;
+            if (upg.type === 'unlockHero') {
+                // Only if hero not already unlocked
+                if (rogueUpgrades.runHeroUnlocked[upg.hero]) return false;
+                return true;
+            }
+            return false;
+        });
+
+        // Weight: rare items have lower chance
+        let weighted = [];
+        for (let upg of available) {
+            let weight = (upg.rarity === 'rare') ? 1 : 3;
+            for (let i = 0; i < weight; i++) weighted.push(upg);
+        }
+        // Shuffle and pick unique
+        let shuffled = weighted.sort(() => Math.random() - 0.5);
+        let picked = [];
+        let seen = new Set();
+        for (let upg of shuffled) {
+            let key = upg.type + upg.tower + upg.hero + upg.stat;
+            if (!seen.has(key) && picked.length < count) {
+                seen.add(key);
+                picked.push(upg);
+            }
+        }
+        return picked;
+    }
+
+    // ---- Apply upgrade ----
+    function applyUpgrade(upgrade) {
+        switch (upgrade.type) {
+            case 'unlockTower':
+                rogueUpgrades.runUnlockedTowers.push(upgrade.tower);
+                // Also update the local unlockedTowers variable (used for building)
+                unlockedTowers[upgrade.tower] = true;
+                break;
+            case 'maxLevel': {
+                const tower = upgrade.tower;
+                if (!rogueUpgrades.towerMaxLevelBonus[tower]) rogueUpgrades.towerMaxLevelBonus[tower] = 0;
+                rogueUpgrades.towerMaxLevelBonus[tower] += 1;
+                break;
+            }
+            case 'towerBuff': {
+                const tower = upgrade.tower;
+                const stat = upgrade.stat;
+                const value = upgrade.value;
+                if (stat === 'income') {
+                    rogueUpgrades.farmIncomeMult += value;
+                } else {
+                    let mapKey = stat + 'Mult';
+                    if (!rogueUpgrades[mapKey]) rogueUpgrades[mapKey] = {};
+                    if (!rogueUpgrades[mapKey][tower]) rogueUpgrades[mapKey][tower] = 1;
+                    rogueUpgrades[mapKey][tower] += value;
+                }
+                break;
+            }
+            case 'globalBuff': {
+                const stat = upgrade.stat;
+                const value = upgrade.value;
+                if (stat === 'coinMult') rogueUpgrades.globalCoinMult += value;
+                else if (stat === 'damageMult') rogueUpgrades.globalDamageMult += value;
+                else if (stat === 'rangeMult') rogueUpgrades.globalRangeMult += value;
+                else if (stat === 'extraLives') rogueUpgrades.extraLives += value;
+                break;
+            }
+            case 'unlockHero': {
+                const hero = upgrade.hero;
+                rogueUpgrades.runHeroUnlocked[hero] = true;
+                // Also set heroUnlocked for the game logic
+                heroUnlocked[hero] = true;
+                // Optionally auto-select? We'll let user select via sidebar.
+                break;
+            }
+        }
+        // Track stat: total upgrades taken (for achievements)
+        let totalUpgrades = parseInt(localStorage.getItem('td_rogue_totalUpgrades') || '0');
+        totalUpgrades++;
+        localStorage.setItem('td_rogue_totalUpgrades', totalUpgrades);
+        updateUI();
+        drawCanvas();
+    }
+
+    // ---- Show upgrade modal ----
+    function showUpgradeModal() {
+        const options = getRandomUpgrades(3);
+        if (options.length === 0) {
+            // No possible upgrades – skip
+            return;
+        }
+        const wasPaused = paused;
+        paused = true;
+
+        const modal = document.createElement('div');
+        modal.className = 'rogue-modal';
+        modal.innerHTML = `
+            <div class="rogue-box">
+                <h2>🎲 UPGRADE</h2>
+                <div class="sub">Choose one enhancement for your run</div>
+                <div id="rogueOptions"></div>
+                <div class="rogue-footer">Wave ${wave} – next upgrade at wave ${Math.ceil((wave+1)/5)*5}</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const container = modal.querySelector('#rogueOptions');
+        options.forEach(upg => {
+            const div = document.createElement('div');
+            div.className = 'upgrade-option';
+            const rarityLabel = upg.rarity === 'rare' ? '⭐ Rare' : '';
+            div.innerHTML = `
+                <div class="icon">${upg.icon || '✨'}</div>
+                <div class="info">
+                    <div class="name">${upg.label} ${rarityLabel}</div>
+                    <div class="desc">${upg.type.replace('tower','').replace('unlock','')}</div>
+                </div>
+            `;
+            div.onclick = () => {
+                applyUpgrade(upg);
+                modal.remove();
+                paused = wasPaused;
+                // Continue to next wave
+                if (!waveActive && !gameOverFlag && lives > 0) {
+                    wave++;
+                    startWave();
+                }
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // ================================================================
+    // FULL GAME LOGIC (adapted for roguelike)
+    // ================================================================
+
+    // -------- URL PARAMETERS --------
+    function getURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            difficulty: params.get('difficulty') || 'normal', // force hard
+            mode: params.get('mode') || 'new'
+        };
+    }
+    const urlParams = getURLParams();
+
+    // -------- DOM REFS --------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const dropdown = document.getElementById('dropdownMenu');
+    const pauseItem = document.getElementById('pauseItem');
+    const musicItem = document.getElementById('musicItem');
+    const forceWaveItem = document.getElementById('forceWaveItem');
+    const turboItem = document.getElementById('turboItem');
+    const menuItem = document.getElementById('menuItem');
+    const diffModal = document.getElementById('difficultyModal');
+    const diffOptions = document.getElementById('difficultyOptions');
+    const diffCancel = document.getElementById('diffModalCancel');
+    const diffConfirm = document.getElementById('diffModalConfirm');
+
+    const canvasLives = document.getElementById('canvasLives');
+    const canvasWave = document.getElementById('canvasWave');
+    const canvasCoin = document.getElementById('canvasCoin');
+    const canvasKills = document.getElementById('canvasKills');
+    const heroDisplay = document.getElementById('heroDisplay');
+    const heroNameDisplay = document.getElementById('heroNameDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const levelProgressFill = document.getElementById('levelProgressFill');
+    const levelKillDisplay = document.getElementById('levelKillDisplay');
+    const rogueUpgradeCounter = document.getElementById('rogueUpgradeCounter');
+
+    const sidebar = document.getElementById('towerSidebar');
+
+    // -------- NAVIGATION --------
+    function navigateTo(page, params) {
+        // Save rogue stats before leaving
+        saveRogueStats();
+        window.parent.postMessage({ type: 'navigate', page: page, params: params }, '*');
+    }
+
+    // -------- ROGUE STATS TRACKING --------
+    function saveRogueStats() {
+        let bestWave = parseInt(localStorage.getItem('td_rogue_bestWave') || '0');
+        if (wave > bestWave) {
+            localStorage.setItem('td_rogue_bestWave', wave);
+        }
+        // We track runs and wins elsewhere
+    }
+
+    function trackRunStart() {
+        let runs = parseInt(localStorage.getItem('td_rogue_runs') || '0');
+        runs++;
+        localStorage.setItem('td_rogue_runs', runs);
+    }
+
+    function trackWin() {
+        let wins = parseInt(localStorage.getItem('td_rogue_wins') || '0');
+        wins++;
+        localStorage.setItem('td_rogue_wins', wins);
+    }
+
+    // -------- HAMBURGER MENU (same) --------
+    let paused = false;
+    let turboEnabled = false;
+
+    function toggleDropdown() {
+        dropdown.classList.toggle('open');
+    }
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+    }
+
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== hamburgerBtn) {
+            closeDropdown();
+        }
+    });
+
+    pauseItem.addEventListener('click', () => {
+        closeDropdown();
+        togglePause();
+        const icon = pauseItem.querySelector('.icon');
+        if (paused) {
+            icon.textContent = '▶️';
+            pauseItem.innerHTML = '<span class="icon">▶️</span> Resume';
+        } else {
+            icon.textContent = '⏸️';
+            pauseItem.innerHTML = '<span class="icon">⏸️</span> Pause';
+        }
+    });
+
+    musicItem.addEventListener('click', () => {
+        closeDropdown();
+        navigateTo('music');
+    });
+
+    forceWaveItem.addEventListener('click', () => {
+        closeDropdown();
+        forceWave();
+    });
+
+    turboItem.addEventListener('click', () => {
+        closeDropdown();
+        toggleTurbo();
+        const icon = turboItem.querySelector('.icon');
+        if (turboEnabled) {
+            icon.textContent = '⏩';
+            turboItem.innerHTML = '<span class="icon">⏩</span> Turbo ON';
+        } else {
+            icon.textContent = '⏩';
+            turboItem.innerHTML = '<span class="icon">⏩</span> Turbo OFF';
+        }
+    });
+
+    menuItem.addEventListener('click', () => {
+        closeDropdown();
+        navigateTo('menu');
+    });
+
+    // -------- PERSISTENT DATA (overridden for rogue) --------
+    // We'll ignore localStorage and use fresh run data
+    let unlockedTowers = { archer: true }; // start with only archer
+    let towerMaxLevels = {}; // will be filled later
+    let extraStartingCash = 0;
+    let extraLives = 0;
+    let totalGems = 0;
+    let boughtExtraCash = false;
+    let boughtExtraLives = false;
+    let playerLevel = 1;
+    let totalKills = 0;
+    let shards = 0;
+    let prestigeLevel = 0;
+    let towerUpgrades = {};
+    let knowledgeUpgrades = {};
+    let heroUnlocked = { clacks: false, spoder: false, minifun: false, trae: false };
+    let heroUpgrades = {};
+    let selectedHero = null;
+    let unlimitedHeroesUnlocked = false;
+    let unlimitedHeroesMode = false;
+    let freeDrawUnlocked = false;
+    let freeDrawMode = false;
+
+    // -------- GAME CONSTANTS --------
+    const COLS = 24, ROWS = 14;
+    let cellW, cellH;
+    const baseStartingCoins = 480, baseLives = 20;
+    let lives = baseLives + extraLives, coins = baseStartingCoins + extraStartingCash, currentKills = 0, wave = 0;
+    let waveActive = false, gameOverFlag = false, autoWaveTimer = null;
+    let enemies = [], towers = [], projectiles = [], spikes = [], pathCells = [];
+    let selectedTowerIndex = -1, activePopup = null;
+    let towerKills = [], towerDamage = [], towerIncome = [];
+    let miniWaveActive = false, miniGroupRemaining = 0, groupDelayTimer = 0, spawnRemaining = 0, spawnDelayCounter = 0;
+    let explosions = [];
+    let flagCarrier = null, flagPlanted = false, flagCarrierActive = false;
+    let isScoutWave = false, scoutWaveComplete = false;
+    let firstFarmBuilt = false, firstArcherFreeUsed = false, placedHeroes = [];
+    let cheatBuffer = "";
+    let pausedByParent = false;
+    let speedMultiplier = 1.5;
+    const DEFAULT_SPEED = 1.5, TURBO_SPEED = 6.0;
+    let totalCoinsEarned = 0;
+
+    let selectedTowerType = null;
+
+    // -------- DIFFICULTY (forced rogue) --------
+    let currentDifficulty = 'Rogue';
+    let unlockedDifficulties = ['Rogue']; // only rogue available
+    let difficultyWaveRecords = {};
+
+    // Override applyDifficultySettings to always return Normal settings
+    function applyDifficultySettings() {
+        // Rogue settings: bossHpMult=3, enemyHpMult=1.5, enemyRewardMult=1.1, waveBonusMult=1, upgradeCostMult=1
+        return {
+        bossHpMult: 3,
+        enemyHpMult: 1.5,
+        enemyRewardMult: 1.1,
+        waveBonusMult: 1,
+        upgradeCostMult: 1,
+        enemySpeedMult: 1.5,
+        deathNoMoneyAfterWave: Infinity,
+        deathNoWaveBonusAfterWave: Infinity,
+        livesOverride: null,
+        enhancementsDisabled: false,
+        enemyCountFormula: null,
+        towerCostMult: 1
+        };
+    }
+    let diffSettings = applyDifficultySettings();
+
+    // -------- TOWER TYPES (same) --------
+    const DAMAGE_MULT = 0.36;
+    function nerf(d){ return Math.max(1, Math.floor(d * DAMAGE_MULT)); }
+    const TOWER_TYPES = {
+        archer: { name:"🏹 Archer", baseCost:250, baseDamage:nerf(6), baseRange:135, baseCooldown:178, icon:"archer", upgradeDamage:nerf(3), upgradeRange:12, upgradeCooldownReduction:11, upgradeCost:110, gemCost:0 },
+        bomber: { name:"💣 Bomber", baseCost:380, baseDamage:nerf(20*1.4), baseRange:140, baseCooldown:0, icon:"bomber", upgradeDamage:nerf(6*1.4), upgradeRange:18, upgradeCost:150, gemCost:5, isSpike:true, spikeInterval:1642, spikeLifetime:26000 },
+        poison: { name:"☠️ Venom", baseCost:400, baseDamage:0, baseRange:0, baseCooldown:5, icon:"poison", upgradeDamage:0, upgradeRange:0, upgradeCost:140, gemCost:12, isAura:true, auraBaseDmg:nerf(8*1.1*1.3), auraRadius:140 },
+        dart: { name:"🎯 Dart", baseCost:384, baseDamage:nerf(11*1.1), baseRange:165, baseCooldown:73, icon:"dart", upgradeDamage:nerf(4*1.1), upgradeRange:14, upgradeCost:130, gemCost:17 },
+        farm: { name:"🌾 Farm", baseCost:576, baseDamage:0, baseRange:0, baseCooldown:0, icon:"farm", upgradeDamage:0, upgradeRange:0, upgradeCost:160, gemCost:20, isFarm:true, incomePerTick:14, incomeInterval:3200 },
+        sniper: { name:"🔭 Sniper", baseCost:500, baseDamage:nerf(35*1.4), baseRange:9999, baseCooldown:1440, icon:"sniper", upgradeDamage:nerf(10*1.4), upgradeRange:0, upgradeCost:200, gemCost:25, infiniteRange:true },
+        mage: { name:"🧙 Mage", baseCost:450, baseDamage:nerf(25), baseRange:200, baseCooldown:1200, icon:"mage", upgradeDamage:nerf(8), upgradeRange:15, upgradeCost:160, gemCost:70, hits:2, chainRange:300 }
+    };
+    const TOWER_ICON_MAP = {
+        archer: 'archer',
+        bomber: 'bomber',
+        poison: 'poison',
+        dart: 'dart',
+        farm: 'farm',
+        sniper: 'sniper',
+        mage: 'mage'
+    };
+
+    // -------- ENEMY TYPES (same) --------
+    const ENEMY_TYPES = [
+        { name:"🟢 Sprout", color:"#7cb518", hpMod:0.8, speedMod:1.0, rewardMod:0.85, phrase:"Just a little guy, but there's always more where he came from." },
+        { name:"🔵 Frostling", color:"#5dade2", hpMod:1.15, speedMod:0.85, rewardMod:1.05, phrase:"He moves slowly, but his chill lingers." },
+        { name:"🟠 Charger", color:"#e67e22", hpMod:0.7, speedMod:1.5, rewardMod:0.95, phrase:"Speed demon. Don't blink." },
+        { name:"🔴 Brute", color:"#c0392b", hpMod:1.9, speedMod:0.68, rewardMod:1.35, phrase:"Big, mean, and takes a beating." },
+        { name:"🟣 Shade", color:"#9b59b6", hpMod:1.25, speedMod:1.12, rewardMod:1.15, phrase:"Elusive and slippery. Hard to pin down." }
+    ];
+    const BOSS_BASE = {
+        cerberus: { name:"🔥 Cerberus", color:"#ff8c00", icon:"🐕", baseHpMult:8, baseRewardMult:5, speedMod:0.7, threshold:40, phrase:"Three heads, one purpose: your doom." },
+        behemoth: { name:"💀 Behemoth", color:"#8b0000", icon:"🐘", baseHpMult:16, baseRewardMult:10, speedMod:0.5, threshold:80, phrase:"The earth trembles when he walks." },
+        titan: { name:"👑 Titan", color:"#b8860b", icon:"👑", baseHpMult:30, baseRewardMult:20, speedMod:0.4, threshold:100, phrase:"King of the monsters. Bow or burn." }
+    };
+
+    // -------- HERO DEFINITIONS (same) --------
+    const HERO_DEFS = {
+        clacks: { name:'Clacks', icon:'clacks', gemCost:400, goldCost:800, range:140, damage:function(l){return 6+(l-1)*3;}, fireRateBonus:function(l){return l*0.05;}, description:'Shoots mini bombs (area damage). Boosts tower fire rate by level%.', upgrades:[{name:'Faster Clacks',desc:'Clacks gains 5% fire rate',levelReq:100},{name:'Bigger Bombs',desc:'Mini bombs explosion +1 tile',levelReq:180},{name:'Stunning Bombs',desc:'Mini bombs stun enemies for 0.5s',levelReq:200}] },
+        spoder: { name:'Spoder', icon:'spoder', gemCost:900, goldCost:750, range:48, damage:function(l){return 11+(l-1)*4;}, poisonDmg:function(l){return 8+(l-1)*3;}, discountBonus:function(l){return l*0.01;}, description:'Shoots in all directions. Applies poison for 1s. Gives % discount to all towers.', upgrades:[{name:'Wider Range',desc:'4 tile range',levelReq:100},{name:'Cheaper Spoder',desc:'Base cost reduced to 500',levelReq:180},{name:'Double Damage',desc:'Double Damage',levelReq:200}] },
+        minifun: { name:'Mini Fun', icon:'minifun', gemCost:1200, goldCost:1000, range:0, damage:function(l){return 2+(l-1)*1;}, fireRate:function(l){return l*1.5;}, description:'Archer tower with + shape range. Shoots continuously in chosen direction(s).', upgrades:[{name:'Two Directions',desc:'Can select two directions to fire',levelReq:100},{name:'Cheaper Mini Fun',desc:'Base cost 800',levelReq:180},{name:'Faster Shots',desc:'Now (lv*4) shots per second',levelReq:200}] },
+        trae: { name:'Trae', icon:'trae', gemCost:1000, goldCost:1600, range:0, damage:0, description:'Tree that gives gold and buffs farms. Levels up with farms placed.', upgrades:[{name:'Life Giver',desc:'Generates one life per round once level 5',levelReq:100},{name:'Fertile Ground',desc:'Farms adjacent to Trae get (+10*lv%) instead of +lv%',levelReq:180},{name:'Cheaper Trae',desc:'Trae costs 1200 gold',levelReq:200}] }
+    };
+    const HERO_ICON_MAP = { clacks:'clacks', spoder:'spoder', minifun:'minifun', trae:'trae' };
+
+    // -------- IMAGE LOADING (same) --------
+    const IMG = {};
+
+    function loadImages(callback) {
+        const basePath = '../MISC/Tiles/';
+        const grassFiles = ['grass1.png', 'grass2.png', 'grass3.png', 'grass4.png', 'grass5.png'];
+        const towerFiles = {
+            archer: 'archer.png',
+            bomber: 'bomb.png',
+            poison: 'poison.png',
+            dart: 'dart.png',
+            farm: 'farm.png',
+            sniper: 'sniper.png',
+            mage: 'mage.png'
+        };
+        const heroFiles = {
+            clacks: 'clacks.png',
+            spoder: 'spoder.png',
+            minifun: 'miniFun.png',
+            trae: 'trae.png'
+        };
+        const projectileFiles = {
+            archer: 'archer.png',
+            dart: 'dart.png',
+            sniper: 'bullet.png',
+            mage: 'magic.png',
+            spoder: 'bullet.png',
+            minifun: 'bullet.png',
+            poison: 'poison.png',
+            bomber: 'mine.png',
+            clacks: 'smallMine.png'
+        };
+
+        let total = 0, loaded = 0;
+        const onLoad = () => { loaded++; if (loaded >= total) callback(); };
+
+        IMG.grass = [];
+        for (let f of grassFiles) {
+            const img = new Image();
+            img.src = basePath + 'Grass/' + f;
+            img.onload = onLoad;
+            img.onerror = onLoad;
+            IMG.grass.push(img);
+            total++;
+        }
+
+        IMG.path = new Image();
+        IMG.path.src = basePath + 'Path/path.png';
+        IMG.path.onload = onLoad;
+        IMG.path.onerror = onLoad;
+        total++;
+
+        IMG.tower = {};
+        for (let [key, file] of Object.entries(towerFiles)) {
+            const img = new Image();
+            img.src = basePath + 'Tower/' + file;
+            img.onload = onLoad;
+            img.onerror = onLoad;
+            IMG.tower[key] = img;
+            total++;
+        }
+
+        IMG.hero = {};
+        for (let [key, file] of Object.entries(heroFiles)) {
+            const img = new Image();
+            img.src = basePath + 'Hero/' + file;
+            img.onload = onLoad;
+            img.onerror = onLoad;
+            IMG.hero[key] = img;
+            total++;
+        }
+
+        const baseProj = '../MISC/Projectiles/';
+        IMG.projectile = {};
+        for (let [key, file] of Object.entries(projectileFiles)) {
+            const img = new Image();
+            img.src = baseProj + file;
+            img.onload = onLoad;
+            img.onerror = onLoad;
+            IMG.projectile[key] = img;
+            total++;
+        }
+
+        if (total === 0) callback();
+    }
+
+    // -------- SAVE / LOAD (overridden) --------
+    function saveAllPersistent() {
+        // Do nothing – we don't want to save rogue state to localStorage
+    }
+
+    function stopAllIntervals() {
+        for (let t of towers) {
+            if (t.farmInterval) clearInterval(t.farmInterval);
+            if (t.auraInterval) clearInterval(t.auraInterval);
+            if (t.spikeIntervalId) clearInterval(t.spikeIntervalId);
+        }
+    }
+
+    function log(msg){ console.log(msg); }
+
+    function saveGameState() {
+        // Do not save game state – rogue runs are temporary
+    }
+
+    function loadGameState() {
+        // No loading
+        return false;
+    }
+
+    // -------- UI UPDATE --------
+    function updateUI() {
+        canvasCoin.innerText = Math.floor(coins);
+        canvasLives.innerText = lives;
+        canvasWave.innerText = wave;
+        canvasKills.innerText = currentKills;
+        updateLevelDisplay();
+        if (placedHeroes.length > 0) {
+            heroDisplay.style.display = 'inline';
+            let names = placedHeroes.map(h=>HERO_DEFS[h.type].name+' Lv'+h.level).join(', ');
+            heroNameDisplay.innerText = placedHeroes.length > 1 ? `${placedHeroes.length} heroes` : names;
+        } else {
+            heroDisplay.style.display = 'none';
+        }
+        const nextUpgrade = Math.ceil((wave+1)/5)*5;
+        rogueUpgradeCounter.textContent = `🎲 Next: ${nextUpgrade}`;
+        renderSidebar();
+    }
+
+    function updateLevelDisplay() {
+        // Simplified – no level progression in rogue
+        levelDisplay.innerText = 'Lv.1';
+        levelProgressFill.style.width = '0%';
+        levelKillDisplay.innerText = '0 / 0';
+    }
+
+    // -------- PATH (same) --------
+    function generateRichOrthogonalPath() {
+        const minLength=30, maxLength=35, maxAttempts=800;
+        let attempts=0, path=null, bestPath=null, bestProgress=0;
+        while (attempts < maxAttempts) {
+            attempts++;
+            let startY = Math.floor(ROWS/2) + (Math.random()<0.5 ? 0 : (Math.random()<0.5 ? 1 : -1));
+            startY = Math.min(ROWS-2, Math.max(1, startY));
+            let testPath = [{x:0, y:startY}];
+            let currentX=0, currentY=startY;
+            let visited = new Set();
+            visited.add(`0,${startY}`);
+            let stuck=false, steps=0;
+            while (!stuck && steps < 200) {
+                steps++;
+                let r = Math.random(), dx=0, dy=0;
+                if (r < 0.50) dx = 1;
+                else if (r < 0.58) dx = -1;
+                else if (r < 0.79) dy = -1;
+                else dy = 1;
+                let nx = currentX + dx, ny = currentY + dy;
+                if (nx < 0) nx = 0;
+                if (nx >= COLS) nx = COLS - 1;
+                if (ny < 1) ny = 1;
+                if (ny > ROWS - 2) ny = ROWS - 2;
+                let key = `${nx},${ny}`;
+                let attempts2 = 0;
+                while (visited.has(key) && attempts2 < 8) {
+                    attempts2++;
+                    let options = [];
+                    if (currentX+1 < COLS) options.push({x:currentX+1, y:currentY});
+                    if (currentY+1 < ROWS-1) options.push({x:currentX, y:currentY+1});
+                    if (currentY-1 > 0) options.push({x:currentX, y:currentY-1});
+                    if (currentX-1 >= 0) options.push({x:currentX-1, y:currentY});
+                    options.sort(()=>Math.random()-0.5);
+                    let found = false;
+                    for (let opt of options) {
+                        let k = `${opt.x},${opt.y}`;
+                        if (!visited.has(k)) { nx=opt.x; ny=opt.y; found=true; break; }
+                    }
+                    if (!found) {
+                        if (currentX+1 < COLS && !visited.has(`${currentX+1},${currentY}`)) {
+                            nx = currentX+1; ny = currentY;
+                        } else { stuck = true; break; }
+                    }
+                    key = `${nx},${ny}`;
+                }
+                if (stuck) break;
+                currentX = nx; currentY = ny;
+                if (!visited.has(key)) { visited.add(key); testPath.push({x:currentX, y:currentY}); }
+                if (currentX === COLS-1) break;
+            }
+            if (currentX === COLS-1 && testPath.length >= minLength && testPath.length <= maxLength) {
+                path = testPath; break;
+            }
+            let progress = currentX;
+            if (progress > bestProgress && testPath.length <= maxLength) {
+                bestProgress = progress; bestPath = testPath;
+            }
+        }
+        if (!path) {
+            path = bestPath || [{x:0, y:Math.floor(ROWS/2)}];
+            let last = path[path.length-1];
+            while (last.x < COLS-1) {
+                let nx = last.x+1, ny = last.y;
+                if (ny > ROWS-2) ny = ROWS-2;
+                if (ny < 1) ny = 1;
+                let key = `${nx},${ny}`;
+                if (path.some(p=>p.x===nx && p.y===ny)) {
+                    let options = [];
+                    if (ny+1 < ROWS-1) options.push({x:nx, y:ny+1});
+                    if (ny-1 > 0) options.push({x:nx, y:ny-1});
+                    if (options.length > 0) {
+                        let chosen = options[Math.floor(Math.random()*options.length)];
+                        nx = chosen.x; ny = chosen.y;
+                    }
+                }
+                path.push({x:nx, y:ny});
+                last = path[path.length-1];
+            }
+        }
+        let unique = [];
+        for (let p of path) {
+            if (unique.length===0 || unique[unique.length-1].x !== p.x || unique[unique.length-1].y !== p.y) {
+                unique.push(p);
+            }
+        }
+        while (unique.length > maxLength) {
+            let removeIdx = Math.floor(unique.length/2);
+            if (removeIdx > 0 && removeIdx < unique.length-1) {
+                unique.splice(removeIdx, 1);
+                if (removeIdx < unique.length) {
+                    let prev = unique[removeIdx-1];
+                    let next = unique[removeIdx];
+                    if (Math.abs(prev.x-next.x) + Math.abs(prev.y-next.y) > 1) {
+                        let dx = Math.sign(next.x-prev.x), dy = Math.sign(next.y-prev.y);
+                        if (dx !== 0 && dy !== 0) {
+                            if (Math.random() < 0.5) { next.x = prev.x + dx; } else { next.y = prev.y + dy; }
+                        }
+                        next.x = Math.min(COLS-1, Math.max(0, next.x));
+                        next.y = Math.min(ROWS-2, Math.max(1, next.y));
+                    }
+                }
+            } else { unique.pop(); }
+        }
+        while (unique.length < minLength) {
+            let last = unique[unique.length-1];
+            if (last.x > 1) {
+                let nx = last.x-1, ny = last.y + (Math.random()<0.5 ? 1 : -1);
+                ny = Math.min(ROWS-2, Math.max(1, ny));
+                unique.push({x:nx, y:ny});
+                if (unique.length < minLength) unique.push({x:last.x, y:ny});
+            } else {
+                let nx = last.x+1;
+                if (nx >= COLS) nx = last.x-1;
+                let ny = last.y + (Math.random()<0.5 ? 1 : -1);
+                ny = Math.min(ROWS-2, Math.max(1, ny));
+                unique.push({x:Math.min(COLS-1, Math.max(0, nx)), y:ny});
+            }
+        }
+        if (unique.length > 0) {
+            unique[0] = {x:0, y:Math.min(ROWS-2, Math.max(1, unique[0].y))};
+            unique[unique.length-1] = {x:COLS-1, y:Math.min(ROWS-2, Math.max(1, unique[unique.length-1].y))};
+        }
+        return unique;
+    }
+
+    function isBuildable(col, row){ return !pathCells.some(p=>p.x===col && p.y===row); }
+
+    // -------- TOWER STATS (with rogue buffs) --------
+    function getTowerStats(type, level) {
+        let base = TOWER_TYPES[type];
+        let dmg = base.baseDamage + (level-1)*base.upgradeDamage;
+        let range = base.baseRange + (level-1)*base.upgradeRange;
+        let cd = base.baseCooldown;
+        if (type === 'archer') cd = Math.max(35, base.baseCooldown - (level-1)*base.upgradeCooldownReduction);
+        else if (type === 'sniper') cd = Math.max(200, base.baseCooldown - (level-1)*20);
+        else if (type !== 'bomber' && type !== 'farm' && type !== 'poison' && type !== 'mage') cd = Math.max(15, base.baseCooldown - (level-1)*1.5);
+        // No towerUpgrades in rogue
+
+        // Apply rogue buffs
+        let dmgMult = rogueUpgrades.globalDamageMult * (rogueUpgrades.towerDamageMult?.[type] || 1);
+        let rangeMult = rogueUpgrades.globalRangeMult * (rogueUpgrades.towerRangeMult?.[type] || 1);
+        let cdMult = 1 / ((rogueUpgrades.towerCooldownMult?.[type] || 1) * (rogueUpgrades.towerCooldownMult?.[type] || 1));
+        dmg = Math.floor(dmg * dmgMult);
+        range = Math.floor(range * rangeMult);
+        cd = Math.floor(cd * cdMult);
+
+        return { damage:dmg, range:range, cooldownMax:cd };
+    }
+
+    function getWaveHpMultiplier(w){ return 1 + Math.floor(w/3)*0.15; }
+    function getRewardMultiplier(waveNum){ return Math.max(0.2, 1 - waveNum*0.008) * diffSettings.enemyRewardMult; }
+    function getWaveBonusMultiplier() { return diffSettings.waveBonusMult; }
+    function getUpgradeCostMultiplier(){ return diffSettings.upgradeCostMult; }
+
+    function getEnemyStats(waveNum, enemyType, isBoss=false, bossId=null) {
+        let baseHp = 24 + Math.floor(waveNum*1.5);
+        let baseReward = (22 + waveNum*0.8) * 0.5 * 0.6;
+        let rewardMult = getRewardMultiplier(waveNum);
+        if (isBoss && bossId) {
+            let boss = BOSS_BASE[bossId];
+            let hpMult = boss.baseHpMult * diffSettings.bossHpMult * (1 + (waveNum - boss.threshold)*0.02);
+            let rewardMultBoss = boss.baseRewardMult * (0.5 + rewardMult*0.5);
+            let hp = Math.floor(baseHp * hpMult * getWaveHpMultiplier(waveNum));
+            hp = Math.floor(hp * 2);
+            let reward = Math.floor(baseReward * rewardMultBoss);
+            let speed = (0.8 + waveNum*0.008) * boss.speedMod * diffSettings.enemySpeedMult;
+            return { maxHp:Math.min(12000,hp), reward:Math.max(20,reward), speed:Math.min(1.8,speed), color:boss.color, name:boss.name, icon:boss.icon };
+        } else {
+            let type = ENEMY_TYPES[enemyType % ENEMY_TYPES.length];
+            let hp = Math.floor(baseHp * type.hpMod * getWaveHpMultiplier(waveNum) * diffSettings.enemyHpMult);
+            hp = Math.floor(hp * 1.1);
+            let reward = Math.floor(baseReward * type.rewardMod * rewardMult);
+            let speed = (0.8 + waveNum*0.008) * type.speedMod * diffSettings.enemySpeedMult;
+            return { maxHp:Math.min(880,hp), reward:Math.max(5,reward), speed:Math.min(2.2,speed), color:type.color, name:type.name, icon:"" };
+        }
+    }
+
+    function getEnemyForWave(waveNum) {
+        if (waveNum === 40) return { isBoss:true, bossId:'cerberus' };
+        if (waveNum === 80) return { isBoss:true, bossId:'behemoth' };
+        if (waveNum === 100) return { isBoss:true, bossId:'titan' };
+        let roll = Math.random();
+        if (waveNum >= 110 && roll < 0.15) return { isBoss:false, bossType:'cerberus' };
+        if (waveNum >= 150 && roll < 0.1) return { isBoss:false, bossType:'behemoth' };
+        if (waveNum >= 200 && roll < 0.08) return { isBoss:false, bossType:'titan' };
+        return { isBoss:false, normalType:Math.floor(Math.random()*ENEMY_TYPES.length) };
+    }
+
+    // -------- FARM, POISON, BOMBER (same) --------
+    function startFarmIncome(idx) {
+        let t = towers[idx];
+        if (!t || t.type !== 'farm') return;
+        if (t.farmInterval) clearInterval(t.farmInterval);
+        let income = TOWER_TYPES.farm.incomePerTick + (t.level-1)*4;
+        if (rogueUpgrades.farmIncomeMult > 1) income = Math.floor(income * rogueUpgrades.farmIncomeMult);
+        let interval = TOWER_TYPES.farm.incomeInterval;
+        let heroBuff = getHeroGlobalBuff();
+        if (heroBuff.farmBonus > 0) income = Math.floor(income * (1 + heroBuff.farmBonus/100));
+        t.farmInterval = setInterval(() => {
+            if (waveActive && !gameOverFlag && !paused) {
+                coins += income;
+                totalCoinsEarned += income;
+                towerIncome[idx] += income;
+                updateUI();
+                let rect = canvas.getBoundingClientRect();
+                let x = t.col*cellW + cellW/2, y = t.row*cellH + cellH/2;
+                let sx = rect.left + (x / (canvas.width/rect.width)), sy = rect.top + (y / (canvas.width/rect.width));
+                let div = document.createElement('div');
+                div.innerText = `+${income}`;
+                div.style.cssText = `position:fixed; left:${sx}px; top:${sy}px; color:#ffdd88; font-weight:bold; font-size:1rem; text-shadow:0 0 5px black; pointer-events:none; z-index:400; animation:farmGlow 0.4s ease-out;`;
+                document.body.appendChild(div);
+                setTimeout(()=>div.remove(), 400);
+            }
+        }, interval);
+    }
+
+    function startPoisonAura(idx) {
+        let t = towers[idx];
+        if (!t || t.type !== 'poison') return;
+        if (t.auraInterval) clearInterval(t.auraInterval);
+        let dmg = TOWER_TYPES.poison.auraBaseDmg + (t.level-1)*3;
+        let rad = TOWER_TYPES.poison.auraRadius + (t.level-1)*12;
+        t.auraInterval = setInterval(() => {
+            if (!waveActive || gameOverFlag || paused) return;
+            let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+            let slow = false; // no upgrades in rogue
+            for (let i=0; i<enemies.length; i++) {
+                let e = enemies[i];
+                if (Math.hypot(e.posXWorld-tx, e.posYWorld-ty) <= rad) {
+                    e.hp -= dmg;
+                    if (e.hp <= 0) killEnemy(i, idx);
+                }
+            }
+            drawCanvas();
+        }, 650);
+    }
+
+    function startSpikeFactory(idx) {
+        let t = towers[idx];
+        if (!t || t.type !== 'bomber') return;
+        if (t.spikeIntervalId) clearInterval(t.spikeIntervalId);
+        let interval = Math.max(700, TOWER_TYPES.bomber.spikeInterval - (t.level-1)*60);
+        t.spikeIntervalId = setInterval(() => {
+            if (!waveActive || gameOverFlag || paused) return;
+            let range = TOWER_TYPES.bomber.baseRange + (t.level-1)*TOWER_TYPES.bomber.upgradeRange;
+            let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+            let valid = pathCells.filter(cell => {
+                let cx = cell.x*cellW + cellW/2, cy = cell.y*cellH + cellH/2;
+                return Math.hypot(cx-tx, cy-ty) <= range;
+            });
+            if (!valid.length) return;
+            let target = valid[Math.floor(Math.random()*valid.length)];
+            let dmg = TOWER_TYPES.bomber.baseDamage + (t.level-1)*TOWER_TYPES.bomber.upgradeDamage;
+            spikes.push({ x:target.x, y:target.y, damage:dmg, lifetime:TOWER_TYPES.bomber.spikeLifetime, towerId:idx });
+            drawCanvas();
+        }, interval);
+    }
+
+    function updateSpikes(delta) {
+        for (let i=0; i<spikes.length; i++) {
+            let s = spikes[i];
+            s.lifetime -= delta;
+            if (s.lifetime <= 0) { spikes.splice(i,1); i--; continue; }
+            let triggered = false;
+            for (let ei=0; ei<enemies.length; ei++) {
+                let e = enemies[ei];
+                let ex = Math.floor(e.posXWorld / cellW), ey = Math.floor(e.posYWorld / cellH);
+                if (ex === s.x && ey === s.y) { triggered = true; break; }
+            }
+            if (triggered) {
+                let spikeX=s.x, spikeY=s.y, damage=s.damage, towerId=s.towerId;
+                spikes.splice(i,1); i--;
+                let radius = Math.min(cellW,cellH)*0.6;
+                explosions.push({ x:spikeX*cellW+cellW/2, y:spikeY*cellH+cellH/2, radius:radius, life:1.0, maxLife:1.0, imgKey:'bomber' });
+                for (let ei=enemies.length-1; ei>=0; ei--) {
+                    let e = enemies[ei];
+                    let ex = Math.floor(e.posXWorld / cellW), ey = Math.floor(e.posYWorld / cellH);
+                    if (Math.abs(ex-spikeX) <= 1 && Math.abs(ey-spikeY) <= 1) {
+                        e.hp -= damage;
+                        if (e.hp <= 0) killEnemy(ei, towerId);
+                    }
+                }
+            }
+        }
+        for (let i=0; i<explosions.length; i++) {
+            let exp = explosions[i];
+            exp.life -= 0.03 * (delta/16);
+            exp.radius *= 1.02;
+            if (exp.life <= 0) { explosions.splice(i,1); i--; }
+        }
+    }
+
+    // -------- FLAG CARRIER (same) --------
+    function updateFlagCarrier(delta) {
+        if (!flagCarrier || flagCarrier.done) return;
+        let targetIdx = flagCarrier.waypointIndex;
+        if (targetIdx >= pathCells.length) {
+            flagCarrier.done = true; flagPlanted = true; flagCarrierActive = false; flagCarrier = null;
+            scoutWaveComplete = true; isScoutWave = false;
+            log("🏁 Flag planted! Wave 0 complete.");
+            if (!waveActive && !gameOverFlag && lives > 0) { wave = 1; startWave(); }
+            drawCanvas();
+            return;
+        }
+        let target = pathCells[targetIdx];
+        let tx = target.x*cellW + cellW/2, ty = target.y*cellH + cellH/2;
+        let dx = tx - flagCarrier.x, dy = ty - flagCarrier.y, dist = Math.hypot(dx,dy), speed = 0.22*(delta/16);
+        if (dist < speed) { flagCarrier.x = tx; flagCarrier.y = ty; flagCarrier.waypointIndex++; }
+        else { let angle = Math.atan2(dy,dx); flagCarrier.x += Math.cos(angle)*speed; flagCarrier.y += Math.sin(angle)*speed; }
+        drawCanvas();
+    }
+
+    function startScoutWave() {
+        if (pathCells.length === 0) return;
+        let start = pathCells[0];
+        flagCarrier = { x:start.x*cellW+cellW/2, y:start.y*cellH+cellH/2, waypointIndex:1, done:false };
+        flagCarrierActive = true; flagPlanted = false; scoutWaveComplete = false; isScoutWave = true;
+        wave = 0; waveActive = true;
+        log("🏁 WAVE 0: The trusty scout is showing the path...");
+        updateUI(); drawCanvas();
+    }
+
+    // -------- HERO (same, but uses rogue's heroUnlocked) --------
+    function placeHero(col, row, heroType) {
+        if (!heroType) heroType = selectedHero;
+        if (!heroType) { log("No hero selected!"); return false; }
+        let def = HERO_DEFS[heroType];
+        if (!heroUnlocked[heroType]) { log(`🔒 ${def.name} not unlocked`); return false; }
+        if (placedHeroes.some(h=>h.type===heroType)) { log(`⚠️ ${def.name} already placed!`); return false; }
+        if (!unlimitedHeroesMode && placedHeroes.length > 0) { log("⚠️ Only one hero allowed unless Unlimited Heroes is enabled."); return false; }
+        if (!isBuildable(col,row)) { log("❌ Path tile!"); return false; }
+        let cost = def.goldCost;
+        if (heroType === 'spoder' && heroUpgrades.spoder[1]) cost = 500;
+        if (heroType === 'minifun' && heroUpgrades.minifun[1]) cost = 800;
+        if (heroType === 'trae' && heroUpgrades.trae[2]) cost = 1200;
+        if (coins < cost) { log(`💰 Need ${cost} coins`); return false; }
+        coins -= cost;
+        let newTower = { col, row, type:'hero', level:1, cooldown:0, heroType, damageDealt:0, farmCount:0, direction:0, heroIndex:placedHeroes.length };
+        towers.push(newTower);
+        let towerIdx = towers.length - 1;
+        let heroData = { type:heroType, level:1, damageDealt:0, farmCount:0, x:col*cellW+cellW/2, y:row*cellH+cellH/2, towerIndex:towerIdx, direction:0 };
+        placedHeroes.push(heroData);
+        towerKills.push(0); towerDamage.push(0); towerIncome.push(0);
+        log(`🦸 ${def.name} placed!`);
+        updateUI(); drawCanvas();
+        if (towers.length === 1 && !waveActive && !gameOverFlag) { startScoutWave(); }
+        return true;
+    }
+
+    function updateHero(delta) {
+        for (let hIdx=0; hIdx<placedHeroes.length; hIdx++) {
+            let hero = placedHeroes[hIdx];
+            let idx = hero.towerIndex;
+            let t = towers[idx];
+            if (!t) continue;
+            let def = HERO_DEFS[hero.type];
+
+            if (hero.type === 'clacks') {
+                let range = def.range + (t.level-1)*10;
+                if (t.cooldown > 0) { t.cooldown -= delta; continue; }
+                let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+                let closest=null, minD=Infinity;
+                for (let ei=0; ei<enemies.length; ei++) {
+                    let e = enemies[ei];
+                    let d = Math.hypot(e.posXWorld-tx, e.posYWorld-ty);
+                    if (d < range && d < minD && e.hp > 0) { minD=d; closest={e, idx:ei}; }
+                }
+                if (closest) {
+                    let dmg = def.damage(t.level);
+                    let targetX = closest.e.posXWorld, targetY = closest.e.posYWorld;
+                    explosions.push({ x:targetX, y:targetY, radius:cellW*0.8, life:1.0, maxLife:1.0, imgKey:'clacks' });
+                    let stun = 0;
+                    let extraRange = 0;
+                    let maxStun = 5 + t.level;
+                    let stunnedCount = 0;
+                    for (let ei=enemies.length-1; ei>=0; ei--) {
+                        let e = enemies[ei];
+                        if (Math.hypot(e.posXWorld-targetX, e.posYWorld-targetY) < cellW*(1.2+extraRange*1.2)) {
+                            e.hp -= dmg;
+                            if (stun > 0 && stunnedCount < maxStun) {
+                                e.stunTimer = (e.stunTimer||0) + stun;
+                                stunnedCount++;
+                            }
+                            if (e.hp <= 0) killEnemy(ei, idx);
+                        }
+                    }
+                    let fireRateBonus = def.fireRateBonus(t.level);
+                    let cooldown = 200 / (1 + fireRateBonus);
+                    cooldown = cooldown * 2;
+                    t.cooldown = cooldown;
+                    hero.damageDealt += dmg * (enemies.length);
+                    checkHeroLevelUp(hero, hIdx);
+                }
+            } else if (hero.type === 'spoder') {
+                let range = def.range;
+                if (t.cooldown > 0) { t.cooldown -= delta; continue; }
+                let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+                let dmg = def.damage(t.level);
+                let poisonDmg = def.poisonDmg(t.level);
+                let directions = [{x:0,y:-1},{x:1,y:-1},{x:1,y:0},{x:1,y:1},{x:0,y:1},{x:-1,y:1},{x:-1,y:0},{x:-1,y:-1}];
+                for (let d of directions) {
+                    projectiles.push({ x:tx, y:ty, dx:d.x, dy:d.y, damage:dmg, speed:4, towerId:idx, poison:poisonDmg, poisonDuration:1000, life:400, imgKey:'spoder' });
+                }
+                t.cooldown = 1600;
+                hero.damageDealt += dmg * 8;
+                checkHeroLevelUp(hero, hIdx);
+            } else if (hero.type === 'minifun') {
+                let dirs = [hero.direction];
+                let rate = def.fireRate(t.level);
+                let interval = 2000 / rate;
+                t.cooldown -= delta;
+                if (t.cooldown > 0) continue;
+                t.cooldown = interval;
+                let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+                let dmg = def.damage(t.level);
+                for (let dir of dirs) {
+                    let dx=0, dy=0;
+                    if (dir===0) dy=-1;
+                    else if (dir===1) dx=1;
+                    else if (dir===2) dy=1;
+                    else if (dir===3) dx=-1;
+                    projectiles.push({
+                        x: tx,
+                        y: ty,
+                        dx: dx,
+                        dy: dy,
+                        damage: dmg,
+                        speed: 6,
+                        towerId: idx,
+                        life: 999999,
+                        imgKey: 'minifun'
+                    });
+                }
+                checkHeroLevelUp(hero, hIdx);
+            } else if (hero.type === 'trae') {
+                let farmCount = towers.filter(t=>t.type==='farm').length;
+                let newLevel = 1;
+                if (farmCount >= 2) {
+                    let base = Math.floor(farmCount/2);
+                    if (base > 8) { newLevel = 8 + Math.floor((farmCount-30)/2); if (newLevel<8) newLevel=8; }
+                    else { newLevel = 1 + Math.floor(farmCount/2); if (newLevel>8) newLevel=8; }
+                }
+                if (newLevel !== t.level) { t.level = newLevel; hero.level = newLevel; log(`🌳 Trae leveled up to ${newLevel}!`); }
+            }
+            if (hero.type !== 'trae') checkHeroLevelUp(hero, hIdx);
+        }
+        updateUI(); drawCanvas();
+    }
+
+    function checkHeroLevelUp(hero, hIdx) {
+        let required = Math.pow(2, hero.level) * 2000;
+        while (hero.damageDealt >= required && hero.level < 999) {
+            hero.level++;
+            hero.damageDealt -= required;
+            required = Math.pow(2, hero.level) * 2000;
+            log(`🦸 ${HERO_DEFS[hero.type].name} leveled up to ${hero.level}!`);
+            let t = towers[hero.towerIndex];
+            if (t) t.level = hero.level;
+            placedHeroes[hIdx] = hero;
+        }
+    }
+
+    function getHeroGlobalBuff() {
+        let buff = { fireRateMult:1, discount:0, farmBonus:0, killBonus:0, waveGold:0 };
+        for (let hero of placedHeroes) {
+            if (hero.type === 'clacks') {
+                let baseBonus = HERO_DEFS.clacks.fireRateBonus(hero.level);
+                buff.fireRateMult *= (1 + baseBonus);
+            } else if (hero.type === 'spoder') {
+                buff.discount += HERO_DEFS.spoder.discountBonus(hero.level);
+            } else if (hero.type === 'trae') {
+                buff.farmBonus += hero.level;
+                buff.killBonus += hero.level;
+                buff.waveGold += 100 * hero.level;
+            }
+        }
+        return buff;
+    }
+
+    // -------- TOWER ATTACK (same, but uses no towerUpgrades) --------
+    function updateTowers(delta) {
+        let heroBuff = getHeroGlobalBuff();
+        for (let i=0; i<towers.length; i++) {
+            let t = towers[i];
+            if (t.type === 'farm' || t.type === 'poison' || t.type === 'bomber' || t.type === 'hero') continue;
+            if (t.cooldown > 0) { t.cooldown -= delta; continue; }
+            let stats = getTowerStats(t.type, t.level);
+            let tx = t.col*cellW + cellW/2, ty = t.row*cellH + cellH/2;
+            let maxTargets = 1;
+            let mageHits = 2;
+            let targets = [];
+            for (let ei=0; ei<enemies.length; ei++) {
+                let e = enemies[ei];
+                let d = Math.hypot(e.posXWorld-tx, e.posYWorld-ty);
+                if (d < stats.range && e.hp > 0) targets.push({e, idx:ei, dist:d});
+            }
+            targets.sort((a,b)=>a.dist-b.dist);
+            let toAttack = targets.slice(0, maxTargets);
+            for (let target of toAttack) {
+                let cd = stats.cooldownMax / heroBuff.fireRateMult;
+                t.cooldown = cd;
+                let projSpeed = 5.8;
+                let proj = { x:tx, y:ty, target:target.e, damage:stats.damage, speed:projSpeed, towerId:i, type:t.type, critical:false, instakill:false, hits:1, imgKey:t.type };
+                if (t.type === 'mage') { proj.hits = mageHits; proj.chainRange = TOWER_TYPES.mage.chainRange || 300; }
+                projectiles.push(proj);
+            }
+        }
+    }
+
+    function updateProjectiles(delta) {
+        for (let i=0; i<projectiles.length; i++) {
+            let p = projectiles[i];
+            let step = p.speed * (delta/16);
+            if (p.dx !== undefined && p.dy !== undefined) {
+                p.x += p.dx * step; p.y += p.dy * step; p.life -= delta;
+                let hit = false;
+                for (let ei=0; ei<enemies.length; ei++) {
+                    let e = enemies[ei];
+                    if (Math.hypot(e.posXWorld-p.x, e.posYWorld-p.y) < 15) {
+                        let dmg = p.damage;
+                        e.hp -= dmg;
+                        if (p.poison && p.poison > 0) { e.poisonTimer = (e.poisonTimer||0) + p.poisonDuration; e.poisonDmg = (e.poisonDmg||0) + p.poison; }
+                        if (e.hp <= 0) killEnemy(ei, p.towerId);
+                        else if (p.towerId !== undefined && towers[p.towerId] && towers[p.towerId].type !== 'farm') towerDamage[p.towerId] += dmg;
+                        hit = true; break;
+                    }
+                }
+                if (hit || p.life <= 0 || p.x<0 || p.x>canvas.width || p.y<0 || p.y>canvas.height) {
+                    projectiles.splice(i,1); i--;
+                }
+                continue;
+            }
+            if (!p.target || p.target.hp <= 0) {
+                if (p.type === 'mage' && p.hits > 0) {
+                    let tx=p.x, ty=p.y;
+                    let best=null, bestD=Infinity;
+                    for (let ei=0; ei<enemies.length; ei++) {
+                        let e = enemies[ei];
+                        if (e.hp <= 0) continue;
+                        let d = Math.hypot(e.posXWorld-tx, e.posYWorld-ty);
+                        if (d < p.chainRange && d < bestD) { bestD=d; best={e, idx:ei}; }
+                    }
+                    if (best) { p.target = best.e; p.hits--; continue; }
+                    else { projectiles.splice(i,1); i--; continue; }
+                } else { projectiles.splice(i,1); i--; continue; }
+            }
+            let dx = p.target.posXWorld - p.x, dy = p.target.posYWorld - p.y;
+            let dist = Math.hypot(dx,dy);
+            if (dist < step) {
+                let idx = enemies.indexOf(p.target);
+                if (idx !== -1) {
+                    let dmg = p.damage;
+                    if (p.instakill) dmg = p.target.hp;
+                    p.target.hp -= dmg;
+                    if (p.poison && p.poison > 0) { p.target.poisonTimer = (p.target.poisonTimer||0) + p.poisonDuration; p.target.poisonDmg = (p.target.poisonDmg||0) + p.poison; }
+                    if (p.target.hp <= 0) killEnemy(idx, p.towerId);
+                    else if (p.towerId !== undefined && towers[p.towerId] && towers[p.towerId].type !== 'farm') towerDamage[p.towerId] += dmg;
+                    if (p.type === 'mage' && p.hits > 0) {
+                        let tx=p.x, ty=p.y;
+                        let best=null, bestD=Infinity;
+                        for (let ei=0; ei<enemies.length; ei++) {
+                            let e = enemies[ei];
+                            if (e.hp <= 0) continue;
+                            let d = Math.hypot(e.posXWorld-tx, e.posYWorld-ty);
+                            if (d < p.chainRange && d < bestD) { bestD=d; best={e, idx:ei}; }
+                        }
+                        if (best) { p.target = best.e; p.hits--; p.x = p.target.posXWorld; p.y = p.target.posYWorld; continue; }
+                        else { projectiles.splice(i,1); i--; continue; }
+                    } else { projectiles.splice(i,1); i--; continue; }
+                } else { projectiles.splice(i,1); i--; continue; }
+            } else {
+                let angle = Math.atan2(dy,dx);
+                p.x += Math.cos(angle)*step; p.y += Math.sin(angle)*step;
+            }
+        }
+    }
+
+    function updateEnemies(delta) {
+        if (!waveActive || paused) return;
+        let move = 0.22*(delta/16);
+        for (let i=0; i<enemies.length; i++) {
+            let e = enemies[i];
+            if (e.stunTimer > 0) { e.stunTimer -= delta; continue; }
+            if (e.poisonTimer > 0) {
+                e.hp -= e.poisonDmg * (delta/1000);
+                e.poisonTimer -= delta;
+                if (e.hp <= 0) { killEnemy(i); continue; }
+            }
+            let speedMod = 1;
+            if (e.slowTimer > 0) {
+                speedMod = 1 - (e.slowAmount||0);
+                e.slowTimer -= delta;
+                if (e.slowTimer < 0) e.slowTimer = 0;
+            }
+            let step = e.speed * move * speedMod;
+            if (e.waypointIndex >= pathCells.length) {
+                lives--;
+                enemies.splice(i,1); i--;
+                updateUI();
+                if (lives <= 0) gameOver();
+                continue;
+            }
+            let target = pathCells[e.waypointIndex];
+            let tx = target.x*cellW + cellW/2, ty = target.y*cellH + cellH/2;
+            let dx = tx - e.posXWorld, dy = ty - e.posYWorld, dist = Math.hypot(dx,dy);
+            if (dist < step) { e.posXWorld = tx; e.posYWorld = ty; e.waypointIndex++; }
+            else { let angle = Math.atan2(dy,dx); e.posXWorld += Math.cos(angle)*step; e.posYWorld += Math.sin(angle)*step; }
+        }
+    }
+
+    function spawnSingleEnemy() {
+        if (!waveActive || gameOverFlag || paused) return;
+        if (spawnRemaining <= 0) return;
+        let start = pathCells[0];
+        let decision = getEnemyForWave(wave);
+        let stats;
+        if (decision.isBoss) { stats = getEnemyStats(wave, 0, true, decision.bossId); }
+        else if (decision.bossType) {
+            let boss = BOSS_BASE[decision.bossType];
+            let baseHp = 24 + Math.floor(wave*1.5);
+            let hpMult = boss.baseHpMult * diffSettings.bossHpMult * 0.4;
+            let rewardMult = boss.baseRewardMult * 0.3;
+            let hp = Math.floor(baseHp * hpMult * getWaveHpMultiplier(wave));
+            hp = Math.floor(hp * 2);
+            let reward = Math.floor((22+wave*0.8)*0.5*0.6 * rewardMult * getRewardMultiplier(wave));
+            let speed = (0.8+wave*0.008) * boss.speedMod * diffSettings.enemySpeedMult * 1.1;
+            stats = { maxHp:Math.min(6000,hp), reward:Math.max(10,reward), speed:Math.min(1.9,speed), color:boss.color, name:boss.name, icon:boss.icon };
+        } else {
+            stats = getEnemyStats(wave, decision.normalType, false);
+        }
+        enemies.push({
+            waypointIndex:1,
+            hp:stats.maxHp, maxHp:stats.maxHp, reward:stats.reward, speed:stats.speed,
+            posXWorld:start.x*cellW+cellW/2, posYWorld:start.y*cellH+cellH/2,
+            color:stats.color, name:stats.name||(decision.bossType?BOSS_BASE[decision.bossType].name:"Enemy"),
+            icon:stats.icon||(decision.bossType?BOSS_BASE[decision.bossType].icon:""),
+            stunTimer:0, slowTimer:0, slowAmount:0
+        });
+        spawnRemaining--;
+        if (miniGroupRemaining > 0) miniGroupRemaining--;
+    }
+
+    function updateSpawning(delta) {
+        if (paused) return;
+        if (!waveActive || gameOverFlag) return;
+        if (isScoutWave) return;
+        if (spawnRemaining <= 0 && miniGroupRemaining === 0) return;
+        if (wave >= 5 && miniWaveActive) {
+            if (miniGroupRemaining > 0) {
+                spawnDelayCounter += delta;
+                if (spawnDelayCounter >= 80) { spawnDelayCounter = 0; spawnSingleEnemy(); }
+            } else if (spawnRemaining > 0) {
+                if (groupDelayTimer <= 0) {
+                    let groupSize = Math.min(spawnRemaining, 3 + Math.floor(Math.random()*3));
+                    miniGroupRemaining = groupSize;
+                    groupDelayTimer = 1500;
+                } else { groupDelayTimer -= delta; }
+            }
+        } else {
+            if (spawnRemaining > 0) {
+                spawnDelayCounter += delta;
+                if (spawnDelayCounter >= (300+Math.random()*700)) { spawnDelayCounter = 0; spawnSingleEnemy(); }
+            }
+        }
+    }
+
+    function killEnemy(idx, towerId) {
+        let e = enemies[idx];
+        if (!e) return;
+        let rewardAmount = e.reward;
+        rewardAmount = Math.floor(rewardAmount * rogueUpgrades.globalCoinMult);
+        coins += rewardAmount;
+        totalCoinsEarned += rewardAmount;
+        currentKills++; totalKills++;
+        if (towerId !== undefined && towerId >= 0 && towers[towerId] && towers[towerId].type !== 'farm') {
+            towerKills[towerId]++; towerDamage[towerId] += e.maxHp;
+        }
+        enemies.splice(idx,1);
+        updateUI();
+        if (enemies.length===0 && spawnRemaining===0 && miniGroupRemaining===0 && waveActive) endWave(true);
+    }
+
+    // -------- WAVE CONTROL --------
+    function startWave() {
+        if (gameOverFlag || waveActive) return;
+        if (wave === 0 && !scoutWaveComplete) return;
+        if (wave === 0 && scoutWaveComplete) wave = 1;
+        waveActive = true;
+        let enemyCount = 4 + Math.floor(wave*0.8);
+        if (wave === 40 || wave === 80 || wave === 100) enemyCount = 1;
+        spawnRemaining = enemyCount;
+        spawnDelayCounter = 0;
+        miniGroupRemaining = 0;
+        groupDelayTimer = 0;
+        miniWaveActive = (wave >= 5);
+        for (let i=0; i<towers.length; i++) {
+            if (towers[i].type === 'farm') startFarmIncome(i);
+            if (towers[i].type === 'poison') startPoisonAura(i);
+            if (towers[i].type === 'bomber') startSpikeFactory(i);
+        }
+        let traeHeroes = placedHeroes.filter(h=>h.type==='trae');
+        for (let hero of traeHeroes) {
+            let gold = 100 * hero.level;
+            coins += gold;
+            totalCoinsEarned += gold;
+            if (hero.towerIndex !== undefined) { towerIncome[hero.towerIndex] = (towerIncome[hero.towerIndex]||0) + gold; }
+            log(`🌳 Trae gave +${gold} gold this wave`);
+        }
+        log(`🌊 WAVE ${wave} — ${enemyCount} enemies`);
+        updateUI();
+    }
+
+    function endWave(victory) {
+        waveActive = false;
+        stopAllIntervals();
+        if (victory) {
+            if (wave > 0) {
+                let bonus = Math.floor((70 + wave*3) * 0.5 * getWaveBonusMultiplier());
+                bonus = Math.floor(bonus * rogueUpgrades.globalCoinMult);
+                coins += bonus;
+                totalCoinsEarned += bonus;
+                log(`🏆 CLEAR! +${bonus}🪙`);
+                // Check for win condition: reaching wave 100
+                if (wave >= 100 && !gameOverFlag) {
+                    trackWin();
+                    log("🎉 YOU WIN! Reached wave 100 in rogue-like!");
+                }
+                // Check for upgrade every 5 waves
+                if (wave % 5 === 0 && !gameOverFlag && wave > 0) {
+                    setTimeout(() => {
+                        showUpgradeModal();
+                    }, 500);
+                    return; // prevent autoWaveTimer
+                }
+                if (autoWaveTimer) clearTimeout(autoWaveTimer);
+                autoWaveTimer = setTimeout(() => {
+                    if (!waveActive && !gameOverFlag && lives > 0 && !paused) {
+                        wave++;
+                        startWave();
+                    }
+                }, 4000);
+            } else {
+                log("Wave 0 complete (scout)");
+                if (autoWaveTimer) clearTimeout(autoWaveTimer);
+                autoWaveTimer = setTimeout(() => {
+                    if (!waveActive && !gameOverFlag && lives > 0 && !paused) { wave = 1; startWave(); }
+                }, 1500);
+            }
+        }
+        enemies = []; projectiles = []; spikes = [];
+        saveRogueStats();
+    }
+
+    function showCoinPopup(x,y,text) {
+        let rect = canvas.getBoundingClientRect();
+        let sx = rect.left + (x/(canvas.width/rect.width)), sy = rect.top + (y/(canvas.width/rect.width));
+        let div = document.createElement('div');
+        div.className = 'coin-popup';
+        div.innerText = text;
+        div.style.left = `${sx}px`;
+        div.style.top = `${sy}px`;
+        document.body.appendChild(div);
+        setTimeout(()=>div.remove(), 800);
+    }
+
+    function gameOver() {
+        gameOverFlag = true; waveActive = false; stopAllIntervals();
+        log(`💀 GAME OVER — wave ${wave}`);
+        saveRogueStats();
+    }
+
+    // -------- MAP --------
+    function regenerateMap(ignoreCustom = false) {
+        // In rogue, we ignore custom map for simplicity; always random
+        pathCells = generateRichOrthogonalPath();
+        log("🗺️ New random map generated.");
+    }
+
+    // -------- FULL RESET (for new run) --------
+    function fullReset() {
+        if (autoWaveTimer) clearTimeout(autoWaveTimer);
+        stopAllIntervals();
+        // Reset rogue state
+        rogueUpgrades = {
+            towerDamageMult: {},
+            towerRangeMult: {},
+            towerCooldownMult: {},
+            farmIncomeMult: 1,
+            globalCoinMult: 1,
+            globalDamageMult: 1,
+            globalRangeMult: 1,
+            extraLives: 0,
+            towerMaxLevelBonus: {},
+            runUnlockedTowers: ['archer'],
+            runHeroUnlocked: { clacks: false, spoder: false, minifun: false, trae: false },
+            runSelectedHero: null,
+            runTowerMaxLevels: {}
+        };
+        // Reset unlockedTowers for building
+        unlockedTowers = { archer: true };
+        for (let key in TOWER_TYPES) {
+            if (key !== 'archer') unlockedTowers[key] = false;
+            towerMaxLevels[key] = 1; // all towers start with max level 1
+        }
+        heroUnlocked = { clacks: false, spoder: false, minifun: false, trae: false };
+        selectedHero = null;
+        // Reset game variables
+        let livesOverride = diffSettings.livesOverride;
+        lives = (livesOverride !== null) ? livesOverride + rogueUpgrades.extraLives : baseLives + rogueUpgrades.extraLives;
+        coins = baseStartingCoins;
+        currentKills = 0; wave = 0;
+        waveActive = false; gameOverFlag = false;
+        enemies = []; towers = []; projectiles = []; spikes = []; explosions = [];
+        towerKills = []; towerDamage = []; towerIncome = [];
+        selectedTowerIndex = -1; closePopup();
+        firstFarmBuilt = false; firstArcherFreeUsed = false; placedHeroes = [];
+        flagCarrier = null; flagCarrierActive = false; flagPlanted = false;
+        isScoutWave = false; scoutWaveComplete = false;
+        drawCanvas();
+        updateUI();
+        log("🔄 Rogue-like run reset.");
+    }
+
+    // -------- ADD / UPGRADE / SELL (adapted) --------
+    function addTower(col, row, type) {
+        if (!isBuildable(col,row)) { log("❌ Path tile!"); return false; }
+        if (towers.some(t=>t.col===col && t.row===row)) { log("Tower exists"); return false; }
+        if (!unlockedTowers[type]) { log(`🔒 ${TOWER_TYPES[type].name} locked`); return false; }
+        let cost = TOWER_TYPES[type].baseCost;
+        // No discounts or free archer in rogue
+        if (coins < cost) { log(`💰 Need ${cost} coins`); return false; }
+        coins -= cost;
+        let newTower = { col, row, type, level:1, cooldown:0, farmInterval:null, auraInterval:null, spikeIntervalId:null, stunTimer:0, freeArcher:false };
+        towers.push(newTower);
+        let idx = towers.length - 1;
+        towerKills.push(0); towerDamage.push(0); towerIncome.push(0);
+        if (type === 'farm') startFarmIncome(idx);
+        if (type === 'poison') startPoisonAura(idx);
+        if (type === 'bomber') startSpikeFactory(idx);
+        log(`✅ Built ${TOWER_TYPES[type].name} Lv1`);
+        updateUI(); drawCanvas();
+        if (towers.length === 1 && !waveActive && !gameOverFlag) startScoutWave();
+        return true;
+    }
+
+    function upgradeTower(idx) {
+        let t = towers[idx];
+        if (t.type === 'hero') { log("Hero upgrades via damage only"); return false; }
+        let maxLvl = towerMaxLevels[t.type] || 1;
+        if (rogueUpgrades.towerMaxLevelBonus && rogueUpgrades.towerMaxLevelBonus[t.type]) {
+            maxLvl += rogueUpgrades.towerMaxLevelBonus[t.type];
+        }
+        if (t.level >= maxLvl) { log(`Max level ${maxLvl}`); return false; }
+        let baseCost = TOWER_TYPES[t.type].upgradeCost + (t.level-1)*25;
+        let cost = Math.floor(baseCost * getUpgradeCostMultiplier());
+        if (coins < cost) { log(`💰 Need ${cost}`); return false; }
+        coins -= cost;
+        t.level++;
+        if (t.type === 'farm') { if (t.farmInterval) clearInterval(t.farmInterval); if (waveActive) startFarmIncome(idx); }
+        if (t.type === 'poison') { if (t.auraInterval) clearInterval(t.auraInterval); startPoisonAura(idx); }
+        if (t.type === 'bomber') { if (t.spikeIntervalId) clearInterval(t.spikeIntervalId); startSpikeFactory(idx); }
+        log(`⬆️ Upgraded to Lv${t.level}`);
+        updateUI(); drawCanvas(); closePopup(); showTowerPopup(idx);
+        return true;
+    }
+
+    function sellTower(idx) {
+        let t = towers[idx];
+        if (t.type === 'hero') {
+            let heroIndex = placedHeroes.findIndex(h=>h.towerIndex===idx);
+            if (heroIndex !== -1) { placedHeroes.splice(heroIndex,1); }
+            if (t.farmInterval) clearInterval(t.farmInterval);
+            if (t.auraInterval) clearInterval(t.auraInterval);
+            if (t.spikeIntervalId) clearInterval(t.spikeIntervalId);
+            towers.splice(idx,1);
+            towerKills.splice(idx,1); towerDamage.splice(idx,1); towerIncome.splice(idx,1);
+            log(`🦸 Hero sold (reappears in shop)`);
+            updateUI(); drawCanvas();
+            return;
+        }
+        let refund = Math.floor((TOWER_TYPES[t.type].baseCost + (t.level-1)*TOWER_TYPES[t.type].upgradeCost*0.6) * 0.6);
+        coins += refund;
+        if (t.farmInterval) clearInterval(t.farmInterval);
+        if (t.auraInterval) clearInterval(t.auraInterval);
+        if (t.spikeIntervalId) clearInterval(t.spikeIntervalId);
+        towers.splice(idx,1);
+        towerKills.splice(idx,1); towerDamage.splice(idx,1); towerIncome.splice(idx,1);
+        if (selectedTowerIndex === idx) selectedTowerIndex = -1;
+        else if (selectedTowerIndex > idx) selectedTowerIndex--;
+        closePopup();
+        log(`💰 Sold +${refund} coins`);
+        updateUI(); drawCanvas();
+    }
+
+    // -------- CHEAT (disabled in rogue) --------
+    function cheatSkipWaves() { log("Cheats disabled in rogue-like"); }
+
+    // -------- KEYBOARD (same) --------
+    window.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') {
+            cheatBuffer += e.key;
+            if (cheatBuffer.length > 4) cheatBuffer = cheatBuffer.slice(-4);
+            if (cheatBuffer === "1024") { cheatSkipWaves(); cheatBuffer = ""; }
+        } else { cheatBuffer = ""; }
+        if (e.code === 'Space') { e.preventDefault(); speedMultiplier = turboEnabled ? TURBO_SPEED : TURBO_SPEED; }
+    });
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') { speedMultiplier = turboEnabled ? TURBO_SPEED : DEFAULT_SPEED; }
+    });
+
+    function togglePause() {
+        paused = !paused;
+        const icon = pauseItem.querySelector('.icon');
+        if (paused) {
+            icon.textContent = '▶️';
+            pauseItem.innerHTML = '<span class="icon">▶️</span> Resume';
+        } else {
+            icon.textContent = '⏸️';
+            pauseItem.innerHTML = '<span class="icon">⏸️</span> Pause';
+        }
+        log(paused ? "Game Paused" : "Game Resumed");
+    }
+
+    function toggleTurbo() {
+        turboEnabled = !turboEnabled;
+        const icon = turboItem.querySelector('.icon');
+        if (turboEnabled) {
+            icon.textContent = '⏩';
+            turboItem.innerHTML = '<span class="icon">⏩</span> Turbo ON';
+            speedMultiplier = TURBO_SPEED;
+        } else {
+            icon.textContent = '⏩';
+            turboItem.innerHTML = '<span class="icon">⏩</span> Turbo OFF';
+            speedMultiplier = DEFAULT_SPEED;
+        }
+        log(turboEnabled ? '🚀 Turbo ON' : '⏹️ Turbo OFF');
+    }
+
+    function forceWave() {
+        if (isScoutWave) { log("Scout wave in progress, let him finish!"); return; }
+        if (!waveActive && !gameOverFlag && lives > 0) {
+            if (!scoutWaveComplete && wave===0) { log("Scout wave hasn't completed yet!"); return; }
+            if (wave===0 && scoutWaveComplete) wave=1;
+            startWave();
+        } else log("Cannot start");
+    }
+
+    // -------- DRAW CANVAS (same as game) --------
+    function drawCanvas() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const dW = cellW, dH = cellH;
+        const grassTiles = IMG.grass || [];
+        const hasGrass = grassTiles.length > 0 && grassTiles.every(img => img && img.complete && img.naturalWidth > 0);
+
+        for (let r=0; r<ROWS; r++) {
+            for (let c=0; c<COLS; c++) {
+                const x = c*dW, y = r*dH;
+                const isPath = pathCells.some(p=>p.x===c && p.y===r);
+                const idx = pathCells.findIndex(p=>p.x===c && p.y===r);
+                if (isPath) {
+                    if (IMG.path && IMG.path.complete && IMG.path.naturalWidth > 0) {
+                        ctx.drawImage(IMG.path, x, y, dW, dH);
+                    } else {
+                        ctx.fillStyle="#6f4f37";
+                        ctx.fillRect(x, y, dW-0.5, dH-0.5);
+                        ctx.fillStyle="#9c7a4d";
+                        ctx.fillRect(x+2, y+2, dW-5, dH-5);
+                    }
+                    if (idx === 0) {
+                        ctx.fillStyle = "#ffdd44";
+                        ctx.font = "16px monospace";
+                        ctx.fillText("→", x+dW/2-8, y+dH/2+6);
+                    }
+                    if (idx === pathCells.length-1 && flagPlanted) {
+                        ctx.fillStyle = "#ff3333";
+                        ctx.font = "20px monospace";
+                        ctx.fillText("🚩", x+dW/2-10, y+dH/2+8);
+                    }
+                } else {
+                    if (hasGrass) {
+                        const grassIdx = ((r * 7 + c * 13) % grassTiles.length);
+                        ctx.drawImage(grassTiles[grassIdx], x, y, dW, dH);
+                    } else {
+                        ctx.fillStyle="#2a6b4e";
+                        ctx.fillRect(x, y, dW-0.5, dH-0.5);
+                        ctx.fillStyle="#398067";
+                        ctx.fillRect(x+1, y+1, dW-3, dH-3);
+                    }
+                }
+                if (flagCarrier && !flagCarrier.done) {
+                    let fx=flagCarrier.x, fy=flagCarrier.y;
+                    let grad = ctx.createRadialGradient(fx,fy,2,fx,fy,Math.min(dW,dH)*0.6);
+                    grad.addColorStop(0,"rgba(255,215,0,0.4)");
+                    grad.addColorStop(1,"rgba(255,215,0,0)");
+                    ctx.fillStyle=grad;
+                    ctx.beginPath();
+                    ctx.arc(fx,fy,Math.min(dW,dH)*0.6,0,Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle="#FFD700";
+                    ctx.beginPath();
+                    ctx.arc(fx,fy,Math.min(dW,dH)*0.28,0,Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle="#FFA500";
+                    ctx.beginPath();
+                    ctx.arc(fx-2,fy-2,Math.min(dW,dH)*0.12,0,Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle="#ff3333";
+                    ctx.font="22px monospace";
+                    ctx.fillText("🚩", fx-12, fy-16);
+                }
+            }
+        }
+
+        for (let s of spikes) {
+            const x = s.x * dW, y = s.y * dH;
+            const img = IMG.projectile['bomber'];
+            const size = Math.min(dW, dH) * 0.7;
+            if (img && img.complete && img.naturalWidth > 0) {
+                ctx.drawImage(img, x + (dW - size) / 2, y + (dH - size) / 2, size, size);
+            } else {
+                ctx.fillStyle = "#ddbb55";
+                ctx.beginPath();
+                ctx.moveTo(x + dW/2, y + 4);
+                ctx.lineTo(x + dW - 8, y + dH - 8);
+                ctx.lineTo(x + 8, y + dH - 8);
+                ctx.fill();
+            }
+        }
+
+        for (let exp of explosions) {
+            let alpha = exp.life / exp.maxLife;
+            let rad = exp.radius * (1 + (1 - exp.life / exp.maxLife) * 0.8);
+            const imgKey = exp.imgKey || null;
+            if (imgKey === 'clacks' && IMG.projectile['clacks']) {
+                const img = IMG.projectile['clacks'];
+                if (img && img.complete && img.naturalWidth > 0) {
+                    const size = rad * 2.5;
+                    ctx.globalAlpha = alpha * 0.9;
+                    ctx.drawImage(img, exp.x - size/2, exp.y - size/2, size, size);
+                    ctx.globalAlpha = 1;
+                    continue;
+                }
+            } else if (imgKey === 'bomber' && IMG.projectile['bomber']) {
+                const img = IMG.projectile['bomber'];
+                if (img && img.complete && img.naturalWidth > 0) {
+                    const size = rad * 2.2;
+                    ctx.globalAlpha = alpha * 0.9;
+                    ctx.drawImage(img, exp.x - size/2, exp.y - size/2, size, size);
+                    ctx.globalAlpha = 1;
+                    continue;
+                }
+            }
+            ctx.globalAlpha = alpha * 0.8;
+            ctx.fillStyle = "#ff6600";
+            ctx.beginPath();
+            ctx.arc(exp.x, exp.y, rad, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#ffcc00";
+            ctx.beginPath();
+            ctx.arc(exp.x, exp.y, rad * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(exp.x - rad * 0.2, exp.y - rad * 0.2, rad * 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        for (let i=0; i<towers.length; i++) {
+            let t = towers[i];
+            let x=t.col*dW, y=t.row*dH;
+            let img = null;
+            let isHero = false;
+            let heroKey = null;
+
+            if (t.type === 'hero') {
+                heroKey = t.heroType;
+                if (IMG.hero && IMG.hero[heroKey] && IMG.hero[heroKey].complete && IMG.hero[heroKey].naturalWidth > 0) {
+                    img = IMG.hero[heroKey];
+                }
+                isHero = true;
+            } else {
+                const towerKey = TOWER_ICON_MAP[t.type] || t.type;
+                if (IMG.tower && IMG.tower[towerKey] && IMG.tower[towerKey].complete && IMG.tower[towerKey].naturalWidth > 0) {
+                    img = IMG.tower[towerKey];
+                }
+            }
+
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.beginPath();
+            ctx.arc(x+dW/2, y+dH/2, Math.min(dW,dH)*0.4, 0, Math.PI*2);
+            ctx.fill();
+
+            if (img) {
+                ctx.drawImage(img, x+2, y+2, dW-4, dH-4);
+            } else {
+                ctx.fillStyle="#1E2F2C";
+                ctx.fillRect(x+4, y+4, dW-8, dH-8);
+                let icon = isHero ? (HERO_DEFS[heroKey]?.icon || '🦸') : (TOWER_TYPES[t.type]?.icon || '🏰');
+                ctx.fillStyle="#FFD966";
+                ctx.font=`${Math.max(16,dW*0.4)}px monospace`;
+                ctx.fillText(icon, x+dW/2-12, y+dH/2+7);
+            }
+
+            ctx.fillStyle = isHero ? "#b8860b" : "#f2e8c9";
+            ctx.font = "bold 9px monospace";
+            ctx.fillText(isHero ? `H${t.level}` : `Lv${t.level}`, x+dW-18, y+12);
+
+            if (selectedTowerIndex === i) {
+                ctx.strokeStyle = isHero ? "#ffd700" : "#f4a261";
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([4,4]);
+                ctx.strokeRect(x+2, y+2, dW-4, dH-4);
+                ctx.setLineDash([]);
+
+                if (t.type === 'poison' && waveActive) {
+                    let rad = TOWER_TYPES.poison.auraRadius + (t.level-1)*12;
+                    ctx.beginPath();
+                    ctx.arc(x+dW/2, y+dH/2, rad, 0, Math.PI*2);
+                    ctx.fillStyle = "rgba(0,255,100,0.15)";
+                    ctx.fill();
+                    ctx.strokeStyle = "#88ffaa";
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([8,8]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                if (isHero && heroKey) {
+                    let def = HERO_DEFS[heroKey];
+                    if (def) {
+                        let range = def.range + (t.level-1)*10;
+                        if (range > 0) {
+                            ctx.beginPath();
+                            ctx.arc(x+dW/2, y+dH/2, range, 0, Math.PI*2);
+                            ctx.strokeStyle="#88ffaa";
+                            ctx.lineWidth=1.8;
+                            ctx.setLineDash([6,8]);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    }
+                } else {
+                    let stats = getTowerStats(t.type, t.level);
+                    if (t.type !== 'sniper' && stats.range > 0) {
+                        ctx.beginPath();
+                        ctx.arc(x+dW/2, y+dH/2, stats.range, 0, Math.PI*2);
+                        ctx.strokeStyle="#ffff88";
+                        ctx.lineWidth=1.8;
+                        ctx.setLineDash([6,8]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    } else if (t.type === 'sniper') {
+                        ctx.beginPath();
+                        ctx.arc(x+dW/2, y+dH/2, Math.max(dW,dH)*8, 0, Math.PI*2);
+                        ctx.strokeStyle="#88ffaa";
+                        ctx.lineWidth=1.2;
+                        ctx.setLineDash([10,12]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+        }
+
+        for (let e of enemies) {
+            let hpPercent = e.hp/e.maxHp;
+            ctx.fillStyle = e.color;
+            ctx.beginPath();
+            ctx.arc(e.posXWorld, e.posYWorld, Math.min(dW,dH)*0.33, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#FFE0B3";
+            ctx.font = "bold 8px monospace";
+            let label = e.icon ? e.icon : (e.name ? e.name.substring(0,2) : "");
+            ctx.fillText(`${label} ${Math.floor(e.hp)}`, e.posXWorld-15, e.posYWorld-15);
+            ctx.fillStyle = "#8b0000";
+            ctx.fillRect(e.posXWorld-14, e.posYWorld-18, 28, 4);
+            ctx.fillStyle = "#4eff6e";
+            ctx.fillRect(e.posXWorld-14, e.posYWorld-18, 28*hpPercent, 4);
+        }
+
+        for (let e of enemies) {
+            if (e.poisonTimer > 0) {
+                const img = IMG.projectile['poison'];
+                if (img && img.complete && img.naturalWidth > 0) {
+                    const size = Math.min(cellW, cellH) * 0.4;
+                    ctx.drawImage(img, e.posXWorld - size/2, e.posYWorld - size/2, size, size);
+                } else {
+                    ctx.fillStyle = '#66ff44';
+                    ctx.beginPath();
+                    ctx.arc(e.posXWorld, e.posYWorld, 6, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        for (let p of projectiles) {
+            const imgKey = p.imgKey || 'default';
+            const img = IMG.projectile[imgKey];
+            if (img && img.complete && img.naturalWidth > 0) {
+                const size = Math.max(16, Math.min(cellW, cellH) * 0.4);
+                ctx.drawImage(img, p.x - size/2, p.y - size/2, size, size);
+            } else {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                ctx.fillStyle = p.dx !== undefined ? "#ffdd44" : "#ffe484";
+                ctx.fill();
+            }
+        }
+
+        if (gameOverFlag) {
+            ctx.font = "bold 28px monospace";
+            ctx.fillStyle = "#FFB347";
+            ctx.fillText("💀 GAME OVER", canvas.width/2-100, canvas.height/2);
+        }
+    }
+
+    // -------- POPUPS (same) --------
+    function closePopup(){ if(activePopup && activePopup.parentNode) activePopup.remove(); activePopup=null; }
+
+    function showTowerPopup(idx) {
+        closePopup();
+        let t = towers[idx];
+        if (t.type === 'hero') {
+            let hero = placedHeroes.find(h => h.towerIndex === idx);
+            if (!hero) return;
+            let def = HERO_DEFS[hero.type];
+            let rect = canvas.getBoundingClientRect();
+            let x = t.col * cellW + cellW/2, y = t.row * cellH + cellH/2;
+            let sx = rect.left + (x / (canvas.width/rect.width)), sy = rect.top + (y / (canvas.width/rect.width));
+            let popup = document.createElement('div');
+            popup.className = 'tower-popup';
+            let left = sx + 20, top = sy - 40;
+            if (left + 200 > window.innerWidth) left = sx - 200;
+            if (left < 10) left = 10;
+            if (top + 180 > window.innerHeight) top = sy - 180;
+            if (top < 10) top = 10;
+            popup.style.left = `${left}px`;
+            popup.style.top = `${top}px`;
+            let content = `<div class="popup-close">✕</div><div><b>${def.icon} ${def.name} Lv${t.level}</b></div>`;
+            if (hero.type === 'trae') {
+                let farmBonus = hero.level, killBonus = hero.level, waveGold = 100 * hero.level;
+                content += `<div>🌾 Farm Bonus: +${farmBonus}%</div><div>💀 Kill Bonus: +${killBonus}%</div><div>💰 Wave Gold: +${waveGold}🪙</div><div>💵 Total Earned: ${Math.floor(towerIncome[idx] || 0)}🪙</div><div>🌳 Farms: ${towers.filter(t=>t.type==='farm').length}</div>`;
+            } else {
+                content += `<div>💥 Damage dealt: ${Math.floor(hero.damageDealt)}</div>`;
+                if (hero.type === 'minifun') {
+                    let dirs = ['↑', '→', '↓', '←'];
+                    content += `<div>Direction: ${dirs[hero.direction]}</div>`;
+                    content += `<div><button class="popup-btn" data-action="rotate">🔄 Rotate</button></div>`;
+                }
+            }
+            content += `<div><span class="popup-btn popup-sell" data-action="sell">💰 SELL</span></div>`;
+            popup.innerHTML = content;
+            popup.querySelector('.popup-close').onclick = () => closePopup();
+            popup.querySelector('[data-action="sell"]').addEventListener('click', (e) => { e.stopPropagation(); sellTower(idx); });
+            let rotateBtn = popup.querySelector('[data-action="rotate"]');
+            if (rotateBtn) {
+                rotateBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    hero.direction = (hero.direction + 1) % 4;
+                    log(`🔄 Mini Fun direction changed`);
+                    closePopup();
+                    showTowerPopup(idx);
+                });
+            }
+            document.body.appendChild(popup);
+            activePopup = popup;
+            selectedTowerIndex = idx;
+            return;
+        }
+        let stats = getTowerStats(t.type, t.level);
+        let maxLvl = towerMaxLevels[t.type] || 1;
+        if (rogueUpgrades.towerMaxLevelBonus && rogueUpgrades.towerMaxLevelBonus[t.type]) {
+            maxLvl += rogueUpgrades.towerMaxLevelBonus[t.type];
+        }
+        let canUpgrade = (t.level < maxLvl);
+        let rect = canvas.getBoundingClientRect();
+        let x = t.col * cellW + cellW/2, y = t.row * cellH + cellH/2;
+        let sx = rect.left + (x / (canvas.width/rect.width)), sy = rect.top + (y / (canvas.width/rect.width));
+        let popup = document.createElement('div');
+        popup.className = 'tower-popup';
+        let left = sx + 20, top = sy - 40;
+        if (left + 180 > window.innerWidth) left = sx - 180;
+        if (left < 10) left = 10;
+        if (top + 170 > window.innerHeight) top = sy - 170;
+        if (top < 10) top = 10;
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
+        let content = `<div class="popup-close">✕</div><div><b>${TOWER_TYPES[t.type].icon} ${TOWER_TYPES[t.type].name} Lv${t.level}</b></div>`;
+        if (t.type === 'farm') {
+            content += `<div>💰 Total earned: ${Math.floor(towerIncome[idx] || 0)}🪙</div>`;
+        } else {
+            content += `<div>💥 Damage: ${stats.damage}</div><div>📡 Range: ${t.type === 'sniper' ? '∞' : Math.floor(stats.range)}</div><div>⚡ Fire rate: ${Math.floor(1000 / stats.cooldownMax)}/s</div><div>🗡️ Kills: ${towerKills[idx] || 0}</div><div>💢 Total Dmg: ${Math.floor(towerDamage[idx] || 0)}</div>`;
+            if (t.type === 'mage') {
+                content += `<div>⚡ Chain hits: 2</div>`;
+            }
+        }
+        content += `<div style="margin-top:8px;">`;
+        if (canUpgrade) {
+            let cost = Math.floor((TOWER_TYPES[t.type].upgradeCost + (t.level - 1) * 25) * getUpgradeCostMultiplier());
+            content += `<span class="popup-btn" data-action="upgrade">⬆ UPGRADE (${cost}🪙)</span>`;
+        }
+        content += `<span class="popup-btn popup-sell" data-action="sell">💰 SELL</span></div>`;
+        popup.innerHTML = content;
+        popup.querySelector('.popup-close').onclick = () => closePopup();
+        popup.querySelector('[data-action="upgrade"]')?.addEventListener('click', (e) => { e.stopPropagation(); upgradeTower(idx); });
+        popup.querySelector('[data-action="sell"]').addEventListener('click', (e) => { e.stopPropagation(); sellTower(idx); });
+        document.body.appendChild(popup);
+        activePopup = popup;
+        selectedTowerIndex = idx;
+    }
+
+    // -------- TOWER SIDEBAR (render) --------
+    function renderSidebar() {
+        sidebar.innerHTML = '';
+        const heroBuff = getHeroGlobalBuff();
+
+        const towerKeys = Object.keys(TOWER_TYPES);
+        for (let type of towerKeys) {
+            const data = TOWER_TYPES[type];
+            const slot = document.createElement('div');
+            slot.className = 'tower-slot';
+            slot.dataset.type = type;
+
+            const locked = !unlockedTowers[type];
+            if (locked) {
+                slot.classList.add('locked');
+                slot.draggable = false;
+            } else {
+                slot.draggable = true;
+                slot.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', type);
+                    slot.classList.add('dragging');
+                });
+                slot.addEventListener('dragend', () => {
+                    slot.classList.remove('dragging');
+                });
+                slot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (selectedTowerType === type) {
+                        selectedTowerType = null;
+                        slot.classList.remove('selected');
+                    } else {
+                        document.querySelectorAll('.tower-slot.selected').forEach(el => el.classList.remove('selected'));
+                        selectedTowerType = type;
+                        slot.classList.add('selected');
+                    }
+                });
+            }
+
+            let cost = data.baseCost;
+            // No discounts in rogue
+            const img = document.createElement('img');
+            img.className = 'tower-icon';
+            const towerKey = TOWER_ICON_MAP[type] || type;
+            if (IMG.tower && IMG.tower[towerKey]) {
+                img.src = IMG.tower[towerKey].src;
+            } else {
+                img.alt = '🔲';
+            }
+            img.draggable = false;
+            slot.appendChild(img);
+
+            const costSpan = document.createElement('div');
+            costSpan.className = 'tower-cost';
+            costSpan.textContent = cost + '🪙';
+            slot.appendChild(costSpan);
+
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            if (locked) {
+                indicator.className = 'indicator locked-indicator';
+                indicator.textContent = '🔒';
+            } else if (coins < cost) {
+                indicator.classList.add('red');
+            } else {
+                indicator.classList.add('green');
+            }
+            slot.appendChild(indicator);
+
+            sidebar.appendChild(slot);
+        }
+
+        // Hero slots (only if hero unlocked)
+        let heroKeysToShow = [];
+        const placedTypes = placedHeroes.map(h => h.type);
+        for (let hkey in heroUnlocked) {
+            if (heroUnlocked[hkey] && !placedTypes.includes(hkey)) {
+                heroKeysToShow.push(hkey);
+            }
+        }
+
+        for (let hkey of heroKeysToShow) {
+            const def = HERO_DEFS[hkey];
+            const slot = document.createElement('div');
+            slot.className = 'tower-slot';
+            slot.dataset.type = 'hero_' + hkey;
+
+            let cost = def.goldCost;
+            slot.draggable = true;
+            slot.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', 'hero_' + hkey);
+                slot.classList.add('dragging');
+            });
+            slot.addEventListener('dragend', () => {
+                slot.classList.remove('dragging');
+            });
+            slot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (selectedTowerType === 'hero_' + hkey) {
+                    selectedTowerType = null;
+                    slot.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('.tower-slot.selected').forEach(el => el.classList.remove('selected'));
+                    selectedTowerType = 'hero_' + hkey;
+                    slot.classList.add('selected');
+                }
+            });
+
+            const img = document.createElement('img');
+            img.className = 'tower-icon';
+            if (IMG.hero && IMG.hero[hkey]) {
+                img.src = IMG.hero[hkey].src;
+            } else {
+                img.alt = '🦸';
+            }
+            img.draggable = false;
+            slot.appendChild(img);
+
+            const costSpan = document.createElement('div');
+            costSpan.className = 'tower-cost';
+            costSpan.textContent = cost + '🪙';
+            slot.appendChild(costSpan);
+
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            if (coins < cost) {
+                indicator.classList.add('red');
+            } else {
+                indicator.classList.add('green');
+            }
+            slot.appendChild(indicator);
+
+            sidebar.appendChild(slot);
+        }
+    }
+
+    // -------- CANVAS DRAG & DROP --------
+    canvas.addEventListener('dragover', (e) => e.preventDefault());
+
+    canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        if (!data) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const col = Math.floor(mx / cellW);
+        const row = Math.floor(my / cellH);
+
+        if (col >= 0 && col < COLS && row >= 0 && row < ROWS && isBuildable(col, row)) {
+            if (data.startsWith('hero_')) {
+                const heroType = data.substring(5);
+                placeHero(col, row, heroType);
+            } else {
+                addTower(col, row, data);
+            }
+        } else {
+            log('❌ Cannot place tower here');
+        }
+    });
+
+    // -------- CANVAS CLICK --------
+    function canvasClick(e) {
+        if (gameOverFlag) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const col = Math.floor(mx / cellW);
+        const row = Math.floor(my / cellH);
+
+        if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+            const idx = towers.findIndex(t => t.col === col && t.row === row);
+            if (idx !== -1) {
+                showTowerPopup(idx);
+                drawCanvas();
+                return;
+            } else {
+                closePopup();
+                selectedTowerIndex = -1;
+
+                if (isBuildable(col, row)) {
+                    if (selectedTowerType) {
+                        if (selectedTowerType.startsWith('hero_')) {
+                            const heroType = selectedTowerType.substring(5);
+                            if (placeHero(col, row, heroType)) {
+                                log(`✅ Placed ${HERO_DEFS[heroType].name}`);
+                                updateUI();
+                            }
+                        } else {
+                            if (addTower(col, row, selectedTowerType)) {
+                                log(`✅ Placed ${TOWER_TYPES[selectedTowerType].name}`);
+                                updateUI();
+                            }
+                        }
+                    } else {
+                        log('👆 Select a tower/hero from the sidebar first, or drag it onto the map.');
+                    }
+                } else {
+                    log('❌ Path tile');
+                }
+                drawCanvas();
+            }
+        } else {
+            closePopup();
+            selectedTowerIndex = -1;
+            drawCanvas();
+        }
+    }
+
+    // -------- RESIZE --------
+    function resizeGameCanvas() {
+        const container = canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const aspect = ROWS / COLS;
+        let cw, ch;
+        if (w / h > COLS / ROWS) {
+            ch = h;
+            cw = ch / aspect;
+        } else {
+            cw = w;
+            ch = cw * aspect;
+        }
+        canvas.width = cw;
+        canvas.height = ch;
+        canvas.style.width = cw + 'px';
+        canvas.style.height = ch + 'px';
+        cellW = canvas.width / COLS;
+        cellH = canvas.height / ROWS;
+        drawCanvas();
+        for (let h of placedHeroes) {
+            const t = towers[h.towerIndex];
+            if (t) {
+                h.x = t.col * cellW + cellW/2;
+                h.y = t.row * cellH + cellH/2;
+            }
+        }
+    }
+
+    // -------- GAME LOOP --------
+    let lastFrame = 0;
+    function gameLoop(now) {
+        let delta = Math.min(60, (now - lastFrame) || 16) * speedMultiplier;
+        lastFrame = now;
+        if (flagCarrier && !flagCarrier.done) updateFlagCarrier(delta);
+        if (!gameOverFlag && waveActive && !paused) {
+            if (!isScoutWave) {
+                updateEnemies(delta);
+                updateTowers(delta);
+                updateProjectiles(delta);
+                updateSpikes(delta);
+                updateSpawning(delta);
+                updateHero(delta);
+                if (enemies.length === 0 && spawnRemaining === 0 && miniGroupRemaining === 0 && waveActive) endWave(true);
+                if (lives <= 0) gameOver();
+                updateUI();
+            }
+        }
+        drawCanvas();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // -------- DIFFICULTY MODAL (disabled) --------
+    // We override the modal to not show
+
+    // -------- INIT --------
+    function init() {
+        // Set up fresh rogue data
+        rogueUpgrades = {
+            towerDamageMult: {},
+            towerRangeMult: {},
+            towerCooldownMult: {},
+            farmIncomeMult: 1,
+            globalCoinMult: 1,
+            globalDamageMult: 1,
+            globalRangeMult: 1,
+            extraLives: 0,
+            towerMaxLevelBonus: {},
+            runUnlockedTowers: ['archer'],
+            runHeroUnlocked: { clacks: false, spoder: false, minifun: false, trae: false },
+            runSelectedHero: null,
+            runTowerMaxLevels: {}
+        };
+        unlockedTowers = { archer: true };
+        for (let key in TOWER_TYPES) {
+            if (key !== 'archer') unlockedTowers[key] = false;
+            towerMaxLevels[key] = 1;
+        }
+        heroUnlocked = { clacks: false, spoder: false, minifun: false, trae: false };
+        selectedHero = null;
+        // Force difficulty normal
+        currentDifficulty = 'normal';
+        diffSettings = applyDifficultySettings();
+
+        // Reset game state
+        localStorage.removeItem('td_saveGame'); // ensure no save interference
+        let livesOverride = diffSettings.livesOverride;
+        lives = (livesOverride !== null) ? livesOverride + rogueUpgrades.extraLives : baseLives + rogueUpgrades.extraLives;
+        coins = baseStartingCoins;
+        currentKills = 0; wave = 0;
+        waveActive = false; gameOverFlag = false;
+        enemies = []; towers = []; projectiles = []; spikes = []; explosions = [];
+        towerKills = []; towerDamage = []; towerIncome = [];
+        selectedTowerIndex = -1; closePopup();
+        firstFarmBuilt = false; firstArcherFreeUsed = false; placedHeroes = [];
+        if (autoWaveTimer) clearTimeout(autoWaveTimer);
+        stopAllIntervals();
+        flagCarrier = null; flagCarrierActive = false; flagPlanted = false;
+        isScoutWave = false; scoutWaveComplete = false;
+        regenerateMap(true);
+        updateUI();
+        trackRunStart(); // track that a run started
+        log("🎲 Rogue-like run started (normal difficulty, only archer).");
+        resizeGameCanvas();
+        canvas.addEventListener('click', canvasClick);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            canvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+        }, { passive: false });
+
+        window.addEventListener('resize', resizeGameCanvas);
+
+        // Disable auto-save and save on visibility change (we don't want to save rogue state)
+        document.addEventListener('visibilitychange', () => { /* no save */ });
+        window.addEventListener('beforeunload', () => { saveRogueStats(); });
+
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data?.type === 'appHidden') {
+                if (!paused) { togglePause(); pausedByParent = true; }
+            } else if (data?.type === 'appVisible') {
+                if (pausedByParent) { togglePause(); pausedByParent = false; }
+            }
+            if (data?.type === 'heroSelected') {
+                selectedHero = data.hero;
+                log(`🦸 Hero selected: ${selectedHero || 'none'}`);
+                updateUI();
+            }
+        });
+
+        requestAnimationFrame(gameLoop);
+        log("🎲 Rogue-like mode ready. Build your first tower!");
+    }
+
+    // Override any difficulty modal shows
+    document.getElementById('difficultyModal').style.display = 'none';
+
+    // Load images and start
+    loadImages(() => {
+        console.log('✅ All images loaded!');
+        init();
+    });
+
+})();
+</script>
+</body>
+</html>

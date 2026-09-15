@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Settings</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            color: #f0ece3;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px; margin: 0 auto;
+            background: rgba(8,18,22,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            padding: 1.8rem 2rem 2rem;
+            border: 1px solid rgba(80,180,140,0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1rem;
+        }
+        .section h3 {
+            color: #ffcd94;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .row button, .row .toggle {
+            background: rgba(42,75,62,0.6);
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #f9e6cf;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .row button:hover, .row .toggle:hover {
+            background: rgba(42,75,62,0.9);
+        }
+        .row .toggle.active { background: #4a8a5a; }
+        .row input[type="range"] { accent-color: #f4a261; width: 120px; }
+
+        .difficulty-buttons {
+            display: flex; flex-wrap: wrap; gap: 0.5rem;
+        }
+        .difficulty-btn {
+            background: #2a4b3e;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #f9e6cf;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .difficulty-btn.active { background: #f4a261; color: #0a1f1a; }
+        .difficulty-btn.locked {
+            background: #3a2a2a;
+            color: #888;
+            cursor: not-allowed;
+            opacity: 0.7;
+            position: relative;
+        }
+        .difficulty-btn.locked::after {
+            content: " 🔒";
+            font-size: 0.6rem;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: linear-gradient(145deg,#10231e,#07120f);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            max-width: 800px;
+            width: 90%;
+            border: 2px solid #f4a261;
+            color: #f0f0e0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box h2 { text-align: center; color: #ffcd94; margin-bottom: 1rem; }
+        .draw-info {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .draw-canvas {
+            background: #1c3b2f;
+            border-radius: 1rem;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+            touch-action: none;
+            border: 3px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .draw-canvas.free-mode { border-color: #00ff88; }
+        .free-mode-label {
+            text-align: center;
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-top: -0.3rem;
+            margin-bottom: 0.3rem;
+            display: none;
+        }
+        .free-mode-label.active { display: block; }
+        .draw-status {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #ffd700;
+            min-height: 1.2rem;
+        }
+        .draw-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            justify-content: center;
+        }
+        .draw-buttons button {
+            background: #2a4b3e;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #f9e6cf;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .draw-buttons button:hover { background: #4a6e3c; }
+        textarea {
+            width: 100%;
+            background: #0e1a16;
+            color: #f0f0e0;
+            border: 1px solid #3a5a4a;
+            border-radius: 0.8rem;
+            padding: 0.8rem;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .map-buttons, .progress-buttons {
+            display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;
+        }
+        .btn-warning { background: #8b4513; }
+        .cheat-section {
+            border: 1px solid #b8860b;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        .cheat-section h3 { color: #ffd700; }
+        .toggle-btn {
+            background: rgba(42,75,62,0.6);
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #f9e6cf;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .toggle-btn.active { background: #4a8a5a; }
+        .close-btn {
+            background: #5e3a2a;
+            border-radius: 30px;
+            width: 28px;
+            color: #f9e6cf;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            .row { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚙️ SETTINGS</h1>
+        <button class="back-btn" id="backBtn">⬅ BACK</button>
+    </div>
+
+    <!-- DIFFICULTY -->
+    <div class="section"><h3>🎚️ DIFFICULTY</h3><div class="difficulty-buttons" id="difficultyButtons"></div><div style="font-size:0.65rem; margin-top:0.3rem;">⚠️ Changing resets current run</div></div>
+
+    <!-- APPEARANCE -->
+    <div class="section"><h3>🎨 APPEARANCE</h3><div class="row"><span>🌓 Theme</span><button id="settingsThemeBtn">TOGGLE DARK/LIGHT</button></div><div class="row"><span>📐 UI Scale</span><input type="range" id="uiScaleSlider" min="30" max="170" value="100"><span id="uiScaleValue">100%</span><button id="resetScaleBtn">Reset</button></div></div>
+
+    <!-- MAP TOOLS -->
+    <div class="section"><h3>🗺️ MAP TOOLS</h3><div class="row"><button id="settingsDrawPathBtn">✏️ DRAW CUSTOM PATH</button></div><div class="row"><button id="settingsMapCodeBtn">🗺️ MAP EXPORT / IMPORT</button></div></div>
+
+    <!-- CHEATS (hidden until unlocked) -->
+    <div class="section" id="cheatSection" style="display:none;">
+        <h3>🔓 CHEATS</h3>
+        <div class="cheat-section">
+            <div class="row"><span>✏️ Free Draw Mode <span style="font-size:0.7rem;opacity:0.6;">(draw anywhere)</span></span><button id="freeDrawToggle" class="toggle-btn">OFF</button></div>
+            <div class="row"><span>🦸 Unlimited Heroes <span style="font-size:0.7rem;opacity:0.6;">(place each hero once)</span></span><button id="unlimitedHeroesToggle" class="toggle-btn">OFF</button></div>
+        </div>
+    </div>
+
+    <!-- SAVE DATA -->
+    <div class="section"><h3>💾 SAVE DATA</h3><div class="row"><button id="settingsExportProgressBtn">📤 EXPORT PROGRESS</button></div><div class="row"><button id="settingsImportProgressBtn">📥 IMPORT PROGRESS</button></div><div class="row"><button id="settingsHardResetBtn" class="btn-warning">⚠️ HARD RESET (ALL DATA)</button></div></div>
+</div>
+
+<!-- MAP DRAWER MODAL -->
+<div id="mapModal" class="modal-overlay">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>✏️ DRAW CUSTOM PATH</h2>
+            <button class="close-btn" id="closeMapModal">✕</button>
+        </div>
+        <div class="free-mode-label" id="freeModeLabel">🔓 FREE DRAW MODE ACTIVE – no restrictions!</div>
+        <div class="draw-info">Use arrow keys or drag on the canvas to move the ball (●).</div>
+        <canvas id="drawCanvas" class="draw-canvas"></canvas>
+        <div class="draw-buttons">
+            <button id="clearPathBtn">🗑️ CLEAR</button>
+            <button id="exportCustomMapBtn">📤 EXPORT CODE</button>
+            <button id="savePathBtn">💾 SAVE & PLAY</button>
+            <button id="cancelDrawBtn">❌ CANCEL</button>
+        </div>
+        <div id="drawStatus" class="draw-status"></div>
+    </div>
+</div>
+
+<!-- PROGRESS MODAL -->
+<div id="progressModal" class="modal-overlay">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>💾 SAVE DATA</h2>
+            <button class="close-btn" id="closeProgressModal">✕</button>
+        </div>
+        <textarea id="progressDataInput" rows="6" placeholder="Paste save data..."></textarea>
+        <div class="progress-buttons">
+            <button id="exportProgressBtn">📤 EXPORT</button>
+            <button id="importProgressBtn">📥 IMPORT</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================================================================
+    // SETTINGS LOGIC + MAP DRAWER
+    // ================================================================
+
+    // ---------- DIFFICULTY ----------
+    const DIFFICULTY_UNLOCK = {
+        easy: { req: null, label: '🍼 EASY', desc: 'The gentle introduction. Enemies are half as tough.', unlockText: 'Always available' },
+        normal: { req: { diff: 'easy', wave: 40 }, label: '🙂 NORMAL', desc: 'The standard experience.', unlockText: 'Reach Wave 40 on EASY' },
+        hard: { req: { diff: 'normal', wave: 60 }, label: '🔥 HARD', desc: 'Enemies hit harder and have more health.', unlockText: 'Reach Wave 60 on NORMAL' },
+        challenger: { req: { diff: 'normal', wave: 60 }, label: '🥷 CHALLENGER', desc: 'Towers cost 30% more, enemies have double health, only 5 lives.', unlockText: 'Reach Wave 60 on NORMAL' },
+        death: { req: [{ diff: 'normal', wave: 80 }, { diff: 'hard', wave: 60 }], label: '💀 DEATH', desc: 'True desperation. Enemies are relentless, and rewards are scarce.', unlockText: 'Reach Wave 80 on NORMAL OR Wave 60 on HARD' },
+        hell: { req: [{ diff: 'death', wave: 80 }, { diff: 'hard', wave: 100 }], label: '👿 HELL', desc: 'A true test of skill. Only 1 life, enhancements disabled, and enemies are brutal.', unlockText: 'Reach Wave 80 on DEATH OR Wave 100 on HARD' },
+        primal: { req: [{ diff: 'death', wave: 80 }, { diff: 'hard', wave: 100 }], label: '🦍 PRIMAL', desc: 'The ultimate survival challenge. Enemy count ramps up quadratically, bosses are huge, but enemies have half health.', unlockText: 'Reach Wave 80 on DEATH OR Wave 100 on HARD' }
+    };
+    let unlockedDifficulties = JSON.parse(localStorage.getItem('td_unlockedDifficulties')) || ['easy'];
+    let currentDifficulty = localStorage.getItem('td_difficulty') || 'easy';
+
+    function updateDifficultyUI() {
+        let container = document.getElementById('difficultyButtons');
+        container.innerHTML = '';
+        for (let [key, def] of Object.entries(DIFFICULTY_UNLOCK)) {
+            let btn = document.createElement('button');
+            btn.className = 'difficulty-btn';
+            if (key === currentDifficulty) btn.classList.add('active');
+            if (!unlockedDifficulties.includes(key)) {
+                btn.classList.add('locked');
+                btn.disabled = true;
+                let req = def.req;
+                let reqText = '';
+                if (Array.isArray(req)) reqText = req.map(r=>`${r.diff} wave ${r.wave}`).join(' or ');
+                else if (req) reqText = `${req.diff} wave ${req.wave}`;
+                btn.title = `Locked. Requires: ${reqText}`;
+            } else {
+                btn.onclick = () => {
+                    localStorage.setItem('td_difficulty', key);
+                    currentDifficulty = key;
+                    updateDifficultyUI();
+                    window.parent.postMessage({ type: 'navigate', page: 'game' }, '*');
+                };
+            }
+            btn.innerText = def.label;
+            container.appendChild(btn);
+        }
+    }
+
+    // ---------- THEME ----------
+    function toggleTheme() {
+        document.body.classList.toggle('light');
+        localStorage.setItem('td_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+    document.getElementById('settingsThemeBtn').onclick = toggleTheme;
+    let savedTheme = localStorage.getItem('td_theme');
+    if (savedTheme === 'light') document.body.classList.add('light');
+
+    // ---------- UI SCALE ----------
+    let savedScale = localStorage.getItem('td_uiScale') || '100';
+    document.getElementById('uiScaleSlider').value = savedScale;
+    document.getElementById('uiScaleValue').innerText = savedScale + '%';
+    document.getElementById('uiScaleSlider').addEventListener('input', function() {
+        let val = this.value;
+        document.getElementById('uiScaleValue').innerText = val + '%';
+        localStorage.setItem('td_uiScale', val);
+        window.parent.postMessage({ type: 'uiScale', scale: val }, '*');
+    });
+    document.getElementById('resetScaleBtn').addEventListener('click', function() {
+        document.getElementById('uiScaleSlider').value = '100';
+        document.getElementById('uiScaleValue').innerText = '100%';
+        localStorage.setItem('td_uiScale', '100');
+        window.parent.postMessage({ type: 'uiScale', scale: '100' }, '*');
+    });
+
+    // ---------- MAP DRAWER ----------
+    const mapModal = document.getElementById('mapModal');
+    const drawCanvas = document.getElementById('drawCanvas');
+    let drawCtx, drawCanvasWidth, drawCanvasHeight;
+    let drawPath = [], drawPathSet = new Set();
+    let drawBallX = 0, drawBallY = Math.floor(14/2);
+    let freeDrawMode = localStorage.getItem('td_freeDrawMode') === 'true';
+    const COLS = 24, ROWS = 14;
+    const statusDiv = document.getElementById('drawStatus');
+
+    function setStatus(msg) {
+        statusDiv.textContent = msg;
+    }
+
+    function resizeDrawCanvas() {
+        let container = drawCanvas.parentElement;
+        let maxWidth = Math.min(container.clientWidth - 20, 750);
+        let aspect = ROWS / COLS;
+        drawCanvas.width = maxWidth;
+        drawCanvas.height = maxWidth * aspect;
+        drawCanvasWidth = drawCanvas.width;
+        drawCanvasHeight = drawCanvas.height;
+        drawCtx = drawCanvas.getContext('2d');
+        drawDrawCanvas();
+    }
+
+    function drawDrawCanvas() {
+        if (!drawCtx) return;
+        drawCtx.clearRect(0, 0, drawCanvasWidth, drawCanvasHeight);
+        let dCellW = drawCanvasWidth / COLS, dCellH = drawCanvasHeight / ROWS;
+        for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
+            let x = c*dCellW, y = r*dCellH;
+            let isPath = drawPathSet.has(`${c},${r}`);
+            if (isPath) {
+                drawCtx.fillStyle = "#6f4f37";
+                drawCtx.fillRect(x, y, dCellW-0.5, dCellH-0.5);
+                drawCtx.fillStyle = "#9c7a4d";
+                drawCtx.fillRect(x+2, y+2, dCellW-5, dCellH-5);
+            } else {
+                drawCtx.fillStyle = "#2a6b4e";
+                drawCtx.fillRect(x, y, dCellW-0.5, dCellH-0.5);
+                drawCtx.fillStyle = "#398067";
+                drawCtx.fillRect(x+1, y+1, dCellW-3, dCellH-3);
+            }
+        }
+        let bx = drawBallX * dCellW + dCellW/2, by = drawBallY * dCellH + dCellH/2;
+        drawCtx.beginPath();
+        drawCtx.arc(bx, by, Math.min(dCellW, dCellH)*0.35, 0, Math.PI*2);
+        drawCtx.fillStyle = "#FFD966";
+        drawCtx.fill();
+        drawCtx.fillStyle = "#000";
+        drawCtx.font = `${Math.max(12,dCellW*0.3)}px monospace`;
+        drawCtx.fillText("●", bx-6, by+6);
+    }
+
+    function addDrawCell(x, y) {
+        if (x<0||x>=COLS||y<0||y>=ROWS) return false;
+        let key = `${x},${y}`;
+        if (!drawPathSet.has(key)) {
+            drawPathSet.add(key);
+            drawPath.push({x,y});
+            return true;
+        }
+        return false;
+    }
+
+    function moveDrawBall(dx, dy) {
+        let nx = drawBallX + dx, ny = drawBallY + dy;
+        if (nx<0||nx>=COLS||ny<0||ny>=ROWS) return;
+        if (freeDrawMode) {
+            drawBallX = nx; drawBallY = ny;
+            addDrawCell(drawBallX, drawBallY);
+            drawDrawCanvas();
+            setStatus("");
+        } else {
+            let key = `${nx},${ny}`;
+            if (drawPathSet.has(key)) { setStatus("❌ Cannot go over same spot twice"); return; }
+            let ddx = Math.abs(nx - drawBallX), ddy = Math.abs(ny - drawBallY);
+            if (!((ddx===1&&ddy===0)||(ddx===0&&ddy===1))) { setStatus("❌ Must move to adjacent cell (orthogonal)"); return; }
+            drawBallX = nx; drawBallY = ny;
+            addDrawCell(drawBallX, drawBallY);
+            drawDrawCanvas();
+            setStatus("");
+        }
+    }
+
+    function clearDrawPath() {
+        drawPath = [];
+        drawPathSet.clear();
+        drawBallX = 0;
+        drawBallY = Math.floor(ROWS/2);
+        addDrawCell(drawBallX, drawBallY);
+        drawDrawCanvas();
+        setStatus("Path cleared");
+    }
+
+    function getDrawMapCode() {
+        let grid = [];
+        for (let r=0; r<ROWS; r++) {
+            let row = [];
+            for (let c=0; c<COLS; c++) {
+                let idx = drawPath.findIndex(p=>p.x===c && p.y===r);
+                row.push(idx === -1 ? '0' : (idx+1).toString());
+            }
+            grid.push(row.join(','));
+        }
+        return grid.join(';');
+    }
+
+    function exportDrawMapCode() {
+        if (drawPath.length === 0) { setStatus("No path drawn"); return; }
+        let code = getDrawMapCode();
+        navigator.clipboard.writeText(code).then(()=>{
+            setStatus("✅ Map code copied to clipboard");
+        }).catch(()=>{
+            setStatus("Failed to copy code");
+        });
+    }
+
+    function saveAndPlay() {
+        if (drawPath.length === 0) {
+            setStatus("❌ No path drawn");
+            return;
+        }
+
+        if (!freeDrawMode) {
+            let valid = true;
+            for (let i=1; i<drawPath.length; i++) {
+                let dx = Math.abs(drawPath[i].x - drawPath[i-1].x);
+                let dy = Math.abs(drawPath[i].y - drawPath[i-1].y);
+                if (dx + dy !== 1) { valid = false; break; }
+            }
+            if (drawPath[0].x !== 0) valid = false;
+            if (drawPath[drawPath.length-1].x !== COLS-1) valid = false;
+            if (!valid) {
+                setStatus("❌ Path must be contiguous, start at column 0, and end at column 23 (unless Free Draw is ON)");
+                return;
+            }
+        } else {
+            for (let p of drawPath) {
+                if (p.x < 0 || p.x >= COLS || p.y < 0 || p.y >= ROWS) {
+                    setStatus("❌ Path cell out of bounds");
+                    return;
+                }
+            }
+        }
+
+        const pathData = drawPath.map(p => ({x:p.x, y:p.y}));
+        localStorage.setItem('td_customMap', JSON.stringify(pathData));
+        setStatus("✅ Map saved to localStorage");
+
+        window.parent.postMessage({
+            type: 'customMap',
+            path: pathData
+        }, '*');
+        setStatus("✅ Map sent to game! Returning...");
+
+        setTimeout(() => {
+            window.parent.postMessage({ type: 'navigate', page: 'game' }, '*');
+        }, 800);
+    }
+
+    document.getElementById('settingsDrawPathBtn').onclick = function() {
+        clearDrawPath();
+        freeDrawMode = localStorage.getItem('td_freeDrawMode') === 'true';
+        drawCanvas.classList.toggle('free-mode', freeDrawMode);
+        document.getElementById('freeModeLabel').classList.toggle('active', freeDrawMode);
+        mapModal.classList.add('active');
+        setTimeout(resizeDrawCanvas, 50);
+        setTimeout(setupDrawTouchSupport, 100);
+    };
+    document.getElementById('closeMapModal').onclick = function() { mapModal.classList.remove('active'); };
+    document.getElementById('cancelDrawBtn').onclick = function() { mapModal.classList.remove('active'); };
+    document.getElementById('clearPathBtn').onclick = clearDrawPath;
+    document.getElementById('exportCustomMapBtn').onclick = exportDrawMapCode;
+    document.getElementById('savePathBtn').onclick = saveAndPlay;
+
+    document.addEventListener('keydown', function(e) {
+        if (!mapModal.classList.contains('active')) return;
+        if (e.key === 'ArrowUp') { e.preventDefault(); moveDrawBall(0, -1); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); moveDrawBall(0, 1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); moveDrawBall(-1, 0); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); moveDrawBall(1, 0); }
+    });
+
+    function setupDrawTouchSupport() {
+        let isDragging = false;
+        function getGridPos(clientX, clientY) {
+            let rect = drawCanvas.getBoundingClientRect();
+            let scaleX = drawCanvasWidth / rect.width, scaleY = drawCanvasHeight / rect.height;
+            let mx = (clientX - rect.left) * scaleX, my = (clientY - rect.top) * scaleY;
+            let col = Math.floor(mx / (drawCanvasWidth/COLS)), row = Math.floor(my / (drawCanvasHeight/ROWS));
+            return { col, row };
+        }
+        function tryMoveTo(col, row) {
+            if (col<0||col>=COLS||row<0||row>=ROWS) return;
+            if (freeDrawMode) {
+                drawBallX = col; drawBallY = row;
+                addDrawCell(drawBallX, drawBallY);
+                drawDrawCanvas();
+                setStatus("");
+                return;
+            }
+            let key = `${col},${row}`;
+            if (drawPathSet.has(key)) { setStatus("❌ Cannot go over same spot twice"); return; }
+            let dx = Math.abs(col - drawBallX), dy = Math.abs(row - drawBallY);
+            if (!((dx===1&&dy===0)||(dx===0&&dy===1))) { setStatus("❌ Must move to adjacent cell (orthogonal)"); return; }
+            drawBallX = col; drawBallY = row;
+            addDrawCell(drawBallX, drawBallY);
+            drawDrawCanvas();
+            setStatus("");
+        }
+        drawCanvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            let touch = e.touches[0];
+            let pos = getGridPos(touch.clientX, touch.clientY);
+            if (pos.col>=0 && pos.col<COLS && pos.row>=0 && pos.row<ROWS) {
+                let key = `${pos.col},${pos.row}`;
+                if (freeDrawMode || !drawPathSet.has(key)) {
+                    drawBallX = pos.col; drawBallY = pos.row;
+                    addDrawCell(drawBallX, drawBallY);
+                    drawDrawCanvas();
+                    isDragging = true;
+                } else {
+                    isDragging = true;
+                }
+            }
+        }, {passive:false});
+        drawCanvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (!isDragging) return;
+            let touch = e.touches[0];
+            let pos = getGridPos(touch.clientX, touch.clientY);
+            if (pos.col>=0 && pos.col<COLS && pos.row>=0 && pos.row<ROWS) tryMoveTo(pos.col, pos.row);
+        }, {passive:false});
+        drawCanvas.addEventListener('touchend', function(e) { e.preventDefault(); isDragging = false; }, {passive:false});
+        drawCanvas.addEventListener('mousedown', function(e) {
+            let pos = getGridPos(e.clientX, e.clientY);
+            if (pos.col>=0 && pos.col<COLS && pos.row>=0 && pos.row<ROWS) {
+                let key = `${pos.col},${pos.row}`;
+                if (freeDrawMode || !drawPathSet.has(key)) {
+                    drawBallX = pos.col; drawBallY = pos.row;
+                    addDrawCell(drawBallX, drawBallY);
+                    drawDrawCanvas();
+                }
+                isDragging = true;
+            }
+        });
+        drawCanvas.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            let pos = getGridPos(e.clientX, e.clientY);
+            if (pos.col>=0 && pos.col<COLS && pos.row>=0 && pos.row<ROWS) tryMoveTo(pos.col, pos.row);
+        });
+        drawCanvas.addEventListener('mouseup', function() { isDragging = false; });
+        drawCanvas.addEventListener('mouseleave', function() { isDragging = false; });
+    }
+
+    // ---------- CHEATS ----------
+    function updateCheatUI() {
+        const freeDrawUnlocked = localStorage.getItem('td_freeDrawUnlocked') === 'true';
+        const unlimitedHeroesUnlocked = localStorage.getItem('td_unlimitedHeroesUnlocked') === 'true';
+        const section = document.getElementById('cheatSection');
+        if (freeDrawUnlocked || unlimitedHeroesUnlocked) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+        const freeDrawMode = localStorage.getItem('td_freeDrawMode') === 'true';
+        const freeBtn = document.getElementById('freeDrawToggle');
+        freeBtn.textContent = freeDrawMode ? 'ON' : 'OFF';
+        freeBtn.classList.toggle('active', freeDrawMode);
+
+        const unlimitedMode = localStorage.getItem('td_unlimitedHeroesMode') === 'true';
+        const unlimBtn = document.getElementById('unlimitedHeroesToggle');
+        unlimBtn.textContent = unlimitedMode ? 'ON' : 'OFF';
+        unlimBtn.classList.toggle('active', unlimitedMode);
+    }
+
+    document.getElementById('freeDrawToggle').addEventListener('click', function() {
+        const current = localStorage.getItem('td_freeDrawMode') === 'true';
+        const newState = !current;
+        localStorage.setItem('td_freeDrawMode', newState);
+        window.parent.postMessage({ type: 'freeDrawToggle', state: newState }, '*');
+        updateCheatUI();
+        freeDrawMode = newState;
+        if (mapModal.classList.contains('active')) {
+            drawCanvas.classList.toggle('free-mode', newState);
+            document.getElementById('freeModeLabel').classList.toggle('active', newState);
+        }
+    });
+
+    document.getElementById('unlimitedHeroesToggle').addEventListener('click', function() {
+        const current = localStorage.getItem('td_unlimitedHeroesMode') === 'true';
+        const newState = !current;
+        localStorage.setItem('td_unlimitedHeroesMode', newState);
+        window.parent.postMessage({ type: 'unlimitedHeroesToggle', state: newState }, '*');
+        updateCheatUI();
+    });
+
+    // ---------- SAVE/IMPORT PROGRESS ----------
+    function exportProgress() {
+        let data = {};
+        for (let key in localStorage) {
+            if (key.startsWith('td_')) {
+                data[key] = localStorage.getItem(key);
+            }
+        }
+        return JSON.stringify(data, null, 2);
+    }
+    function importProgress(jsonStr) {
+        try {
+            let data = JSON.parse(jsonStr);
+            for (let key in data) {
+                localStorage.setItem(key, data[key]);
+            }
+            alert('Progress imported! Reload the page to see changes.');
+            window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+        } catch (e) {
+            alert('Invalid data');
+        }
+    }
+
+    document.getElementById('settingsExportProgressBtn').onclick = function() {
+        document.getElementById('progressDataInput').value = exportProgress();
+        document.getElementById('progressModal').classList.add('active');
+    };
+    document.getElementById('settingsImportProgressBtn').onclick = function() {
+        document.getElementById('progressModal').classList.add('active');
+    };
+    document.getElementById('exportProgressBtn').onclick = function() {
+        document.getElementById('progressDataInput').value = exportProgress();
+        alert('Progress copied to textarea.');
+    };
+    document.getElementById('importProgressBtn').onclick = function() {
+        let data = document.getElementById('progressDataInput').value;
+        if (data) importProgress(data);
+        else alert('No data');
+        document.getElementById('progressModal').classList.remove('active');
+    };
+    document.getElementById('closeProgressModal').onclick = function() {
+        document.getElementById('progressModal').classList.remove('active');
+    };
+
+    // ---------- HARD RESET (FIXED: clears all, navigates to menu) ----------
+    document.getElementById('settingsHardResetBtn').onclick = function() {
+    if (confirm('⚠️ HARD RESET will delete ALL progress. Continue?')) {
+        localStorage.clear();
+
+        // Tell all frames to reset their state
+        window.parent.postMessage({ type: 'hardReset' }, '*');
+
+        // Also navigate back to menu
+        window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+    }
+};
+
+    // ---------- NAVIGATION – BACK TO MENU ----------
+    document.getElementById('backBtn').addEventListener('click', function() {
+        window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+    });
+
+    // ---------- MAP CODE IMPORT/EXPORT via textarea ----------
+    document.getElementById('settingsMapCodeBtn').onclick = function() {
+        document.getElementById('settingsDrawPathBtn').click();
+    };
+
+    document.querySelectorAll('.modal-overlay').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            if (e.target === el) el.classList.remove('active');
+        });
+    });
+
+    // ---------- INIT ----------
+    updateDifficultyUI();
+    updateCheatUI();
+
+    console.log('⚙️ Settings ready – hard reset now clears data and returns to menu.');
+</script>
+</body>
+</html>

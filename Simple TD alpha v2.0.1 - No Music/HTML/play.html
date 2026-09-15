@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Play</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f0ece3;
+            overflow: hidden;
+            padding: 20px;
+        }
+        .play-container {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(8, 18, 22, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 3rem;
+            padding: 1.8rem 2rem 1.5rem;
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        .play-container::-webkit-scrollbar { width: 4px; }
+        .play-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.4rem 1.2rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        /* -------- DIFFICULTY (horizontal, icons) -------- */
+        .diff-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+        .diff-btn {
+            background: rgba(20, 34, 30, 0.4);
+            border: 2px solid rgba(80, 180, 140, 0.1);
+            border-radius: 1.2rem;
+            padding: 0.4rem 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #8b9a9a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        .diff-btn .diff-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+        .diff-btn .diff-label {
+            font-size: 0.6rem;
+            margin-top: 2px;
+            font-weight: 700;
+        }
+        .diff-btn:hover {
+            border-color: rgba(244, 162, 97, 0.3);
+            background: rgba(30, 50, 44, 0.4);
+            color: #f0ece3;
+        }
+        .diff-btn.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.08);
+            color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.04);
+        }
+        .diff-btn.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+        .diff-btn .diff-desc {
+            font-size: 0.5rem;
+            opacity: 0.5;
+            margin-top: 1px;
+        }
+
+        /* -------- ACTION BUTTONS -------- */
+        .action-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+        .action-btn {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 60px;
+            border: 2px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            color: #f9e6cf;
+            background: rgba(42, 75, 62, 0.3);
+        }
+        .action-btn:hover:not(:disabled) { transform: scale(1.01); }
+        .action-btn:active:not(:disabled) { transform: scale(0.96); }
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .action-btn.primary {
+            background: linear-gradient(135deg, #4a7a5a, #2a5a3a);
+            border-color: rgba(255,215,0,0.2);
+            box-shadow: 0 6px 24px rgba(74, 122, 90, 0.25);
+        }
+        .action-btn.primary:hover:not(:disabled) {
+            box-shadow: 0 8px 32px rgba(74, 122, 90, 0.4);
+            border-color: rgba(255,215,0,0.4);
+        }
+        .action-btn.secondary {
+            background: rgba(42, 75, 62, 0.3);
+            border-color: rgba(80, 180, 140, 0.1);
+        }
+        .action-btn.secondary:hover:not(:disabled) { background: rgba(42, 75, 62, 0.5); }
+        .action-btn .sub {
+            font-size: 0.65rem;
+            font-weight: 400;
+            opacity: 0.5;
+        }
+
+        .footer {
+            font-size: 0.55rem;
+            opacity: 0.2;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .play-container { padding: 1rem; }
+            .header h1 { font-size: 1.4rem; }
+            .diff-btn { min-width: 50px; padding: 0.3rem 0.5rem; }
+            .diff-btn .diff-icon { font-size: 1.2rem; }
+            .action-btn { font-size: 0.9rem; padding: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="play-container">
+    <div class="header">
+        <h1>🎮 PLAY</h1>
+        <button class="back-btn" id="backBtn">⬅ BACK</button>
+    </div>
+
+    <!-- Difficulty Selection (horizontal icons) -->
+    <div style="font-size:0.85rem; opacity:0.6; margin-bottom:0.6rem;">⚔️ Select Difficulty</div>
+    <div class="diff-grid" id="diffGrid"></div>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+        <button class="action-btn primary" id="newGameBtn">🆕 New Game</button>
+        <button class="action-btn secondary" id="customMapBtn">🗺️ Custom Map</button>
+        <button class="action-btn secondary" id="continueBtn">📂 Continue Last Game</button>
+        
+        <!-- ROGUE‑LIKE BUTTON (unlocked only after all difficulties) -->
+        <button class="action-btn secondary" id="rogueLikeBtn" disabled>
+            🎲 Rogue‑like Mode <span class="sub">(unlock all difficulties)</span>
+        </button>
+
+        <!-- LEARN TO PLAY BUTTON (new) -->
+        <button class="action-btn secondary" id="learnBtn">
+            🎓 Learn to Play <span class="sub">(some help if you need it 😉)</span>
+        </button>
+    </div>
+
+    <div class="footer">💾 Your progress is saved automatically</div>
+</div>
+
+<script>
+    // ================================================================
+    // DIFFICULTY DATA (from game)
+    // ================================================================
+    const DIFFICULTY_UNLOCK = {
+        easy: { req: null, label: 'EASY', icon: '🍼', desc: 'Gentle introduction' },
+        normal: { req: { diff: 'easy', wave: 40 }, label: 'NORMAL', icon: '🙂', desc: 'Standard experience' },
+        hard: { req: { diff: 'normal', wave: 60 }, label: 'HARD', icon: '🔥', desc: 'Enemies hit harder' },
+        challenger: { req: { diff: 'normal', wave: 60 }, label: 'CHALLENGER', icon: '🥷', desc: 'Towers cost more, 5 lives' },
+        death: { req: [{ diff: 'normal', wave: 80 }, { diff: 'hard', wave: 60 }], label: 'DEATH', icon: '💀', desc: 'Relentless' },
+        hell: { req: [{ diff: 'death', wave: 80 }, { diff: 'hard', wave: 100 }], label: 'HELL', icon: '👿', desc: '1 life, no enhancements' },
+        primal: { req: [{ diff: 'death', wave: 80 }, { diff: 'hard', wave: 100 }], label: 'PRIMAL', icon: '🦍', desc: 'Quadratic scaling' }
+    };
+
+    // ================================================================
+    // STATE
+    // ================================================================
+    let selectedDifficulty = localStorage.getItem('td_difficulty') || 'easy';
+    let unlockedDifficulties = JSON.parse(localStorage.getItem('td_unlockedDifficulties')) || ['easy'];
+
+    const diffGrid = document.getElementById('diffGrid');
+
+    // ================================================================
+    // RENDER DIFFICULTY BUTTONS
+    // ================================================================
+    function renderDifficulties() {
+        diffGrid.innerHTML = '';
+        for (let [key, def] of Object.entries(DIFFICULTY_UNLOCK)) {
+            const unlocked = unlockedDifficulties.includes(key);
+            const btn = document.createElement('div');
+            btn.className = 'diff-btn' + (key === selectedDifficulty ? ' selected' : '') + (unlocked ? '' : ' locked');
+            btn.innerHTML = `
+                <div class="diff-icon">${def.icon}</div>
+                <div class="diff-label">${def.label}</div>
+                <div class="diff-desc">${unlocked ? def.desc : '🔒'}</div>
+            `;
+            if (unlocked) {
+                btn.addEventListener('click', () => {
+                    selectedDifficulty = key;
+                    renderDifficulties();
+                });
+            }
+            diffGrid.appendChild(btn);
+        }
+    }
+
+    // ================================================================
+    // NAVIGATION
+    // ================================================================
+    function navigateTo(page, params) {
+        window.parent.postMessage({ type: 'navigate', page: page, params: params }, '*');
+    }
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+        navigateTo('menu');
+    });
+
+    // ================================================================
+    // GAME LAUNCHERS
+    // ================================================================
+    function launchGame(mode, params) {
+        localStorage.setItem('td_difficulty', selectedDifficulty);
+        let query = 'difficulty=' + encodeURIComponent(selectedDifficulty);
+        if (mode === 'custom') {
+            query += '&mode=custom';
+        } else if (mode === 'continue') {
+            query += '&mode=continue';
+        } else {
+            query += '&mode=new';
+        }
+        if (params) {
+            query += '&' + params;
+        }
+        navigateTo('game', query);
+    }
+
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+        if (unlockedDifficulties.length === 0) {
+            alert('No difficulties unlocked! Play the game to unlock some.');
+            return;
+        }
+        launchGame('new');
+    });
+
+    document.getElementById('customMapBtn').addEventListener('click', () => {
+        const customMap = localStorage.getItem('td_customMap');
+        if (!customMap) {
+            alert('No custom map found. Draw one in Settings first.');
+            return;
+        }
+        launchGame('custom');
+    });
+
+    document.getElementById('continueBtn').addEventListener('click', () => {
+        const diffRecords = JSON.parse(localStorage.getItem('td_difficultyWaveRecords') || '{}');
+        const hasProgress = Object.values(diffRecords).some(w => w > 0);
+        if (!hasProgress) {
+            alert('No saved game found. Start a new game first.');
+            return;
+        }
+        const saveState = localStorage.getItem('td_saveGame');
+        if (!saveState) {
+            alert('No game state saved. Start a new game first.');
+            return;
+        }
+        launchGame('continue');
+    });
+
+    // ================================================================
+    // ROGUE‑LIKE UNLOCK CHECK & HANDLER
+    // ================================================================
+    function checkRogueUnlock() {
+        const allDifficulties = ['easy', 'normal', 'hard', 'challenger', 'death', 'hell', 'primal'];
+        const unlocked = JSON.parse(localStorage.getItem('td_unlockedDifficulties')) || ['easy'];
+        const allUnlocked = allDifficulties.every(d => unlocked.includes(d));
+        const btn = document.getElementById('rogueLikeBtn');
+        if (allUnlocked) {
+            btn.disabled = false;
+            btn.innerHTML = '🎲 Rogue‑like Mode';
+            btn.title = 'Start a new rogue‑like run';
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = '🎲 Rogue‑like Mode 🔒';
+            btn.title = 'Unlock all difficulties first';
+        }
+    }
+
+    // Call on load and on storage changes
+    checkRogueUnlock();
+    window.addEventListener('storage', checkRogueUnlock);
+
+    // Rogue‑like button click handler
+    document.getElementById('rogueLikeBtn').addEventListener('click', () => {
+        if (document.getElementById('rogueLikeBtn').disabled) return;
+        const selectedDifficulty = localStorage.getItem('td_difficulty') || 'easy';
+        const query = 'mode=roguelike&difficulty=' + encodeURIComponent(selectedDifficulty);
+        navigateTo('roguelike_select', query);
+    });
+
+    // ================================================================
+    // LEARN TO PLAY (TUTORIAL)
+    // ================================================================
+    const learnBtn = document.getElementById('learnBtn');
+
+    function updateLearnButton() {
+        const complete = localStorage.getItem('td_tutorial_complete') === 'true';
+        if (complete) {
+            learnBtn.innerHTML = '✅ Learn to Play <span class="sub">(seen)</span>';
+            learnBtn.title = 'Tutorial completed! Click to replay.';
+        } else {
+            learnBtn.innerHTML = '🎓 Learn to Play <span class="sub">(some help if you need it 😉)</span>';
+            learnBtn.title = 'Complete the tutorial if you need some help.';
+        }
+    }
+
+    // Initial update
+    updateLearnButton();
+
+    // Listen for storage changes (if completed from another tab)
+    window.addEventListener('storage', updateLearnButton);
+
+    // Learn button click handler
+    learnBtn.addEventListener('click', () => {
+        // Always allow re-entering the tutorial
+        navigateTo('learn');
+    });
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    renderDifficulties();
+
+    console.log('🎮 Play screen loaded (with Rogue‑like button and Learn to Play)');
+</script>
+</body>
+</html>

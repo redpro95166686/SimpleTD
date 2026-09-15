@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- 
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏠 Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0c16;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+            color: #f0ece3;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .menu-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #0a0c16;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* -------- BACKGROUND IMAGE -------- */
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../MISC/Image/menu.jpg') center/cover no-repeat;
+            z-index: 0;
+            filter: brightness(0.7) saturate(0.9);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* -------- OVERLAY -------- */
+        .menu-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                        rgba(0,0,0,0.3) 0%, 
+                        rgba(0,0,0,0.1) 40%, 
+                        rgba(0,0,0,0.2) 60%, 
+                        rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* -------- HEADER BAR -------- */
+        .header-bar {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            padding: 24px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header-title {
+            font-size: 2rem;
+            font-weight: 400;
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            text-shadow: 0 0 60px rgba(255, 170, 102, 0.15);
+            pointer-events: none;
+            image-rendering: pixelated;
+        }
+        .header-right {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* -------- GEMS & SHARDS (pixel stats) -------- */
+        .stat-compact {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 6px 12px;
+            border-radius: 0px;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #ffecb3;
+            font-family: 'Press Start 2P', monospace;
+            border: 3px solid rgba(255, 215, 0, 0.08);
+            image-rendering: pixelated;
+        }
+        .stat-compact .stat-icon {
+            font-size: 0.8rem;
+        }
+        .stat-compact .stat-value {
+            min-width: 20px;
+            text-align: center;
+        }
+        #gemDisplay .stat-value { color: #b0d8e8; }
+        #shardDisplay .stat-value { color: #f0d080; }
+
+        /* -------- LEVEL PROGRESS (pixelated) -------- */
+        .level-progress-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 6px 16px;
+            border-radius: 0px;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #ffecb3;
+            font-family: 'Press Start 2P', monospace;
+            border: 3px solid rgba(255, 215, 0, 0.08);
+            image-rendering: pixelated;
+        }
+        .level-progress-compact .track {
+            width: 60px;
+            height: 4px;
+            background: #2a3a2a;
+            overflow: hidden;
+            border: 1px solid #1a1a1a;
+        }
+        .level-progress-compact .fill {
+            height: 100%;
+            background: #ffd700;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .level-progress-compact .level-text {
+            min-width: 32px;
+            text-align: center;
+            color: #ffd700;
+        }
+        .level-progress-compact .prestige-text {
+            color: #ff8c00;
+            font-size: 0.5rem;
+            margin-left: 2px;
+        }
+
+        /* -------- RESUME BUTTON (pixelated) -------- */
+        .resume-btn {
+            background: rgba(42, 75, 62, 0.85);
+            border: 3px solid rgba(255, 215, 0, 0.15);
+            padding: 0.5rem 1.6rem;
+            border-radius: 0px;
+            color: #f9e6cf;
+            font-size: 0.7rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: 0.1s;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            font-family: 'Press Start 2P', monospace;
+            image-rendering: pixelated;
+        }
+        .resume-btn:hover:not(:disabled) {
+            background: rgba(42, 75, 62, 0.95);
+            border-color: rgba(255, 215, 0, 0.3);
+            transform: scale(1.02);
+        }
+        .resume-btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .resume-btn .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 0px;
+            margin-right: 6px;
+            border: 1px solid rgba(0,0,0,0.3);
+        }
+        .resume-btn .status-dot.active {
+            background: #4eff6e;
+            box-shadow: 0 0 8px rgba(78, 255, 110, 0.4);
+        }
+        .resume-btn .status-dot.inactive {
+            background: #555;
+        }
+
+        /* -------- BOTTOM NAV – PIXEL STYLE -------- */
+        .bottom-nav {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-evenly;
+            gap: 12px;
+            background: #8b7a5a;
+            padding: 20px 16px;
+            width: 100%;
+            border-top: 4px solid #6b5a3a;
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.6);
+            flex-shrink: 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            image-rendering: pixelated;
+        }
+        .bottom-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 3px solid transparent;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: 0.1s;
+            gap: 6px;
+            min-width: 120px;
+            flex-shrink: 0;
+            border-radius: 0px;
+            image-rendering: pixelated;
+        }
+        .nav-btn:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-btn:active {
+            transform: scale(0.92);
+        }
+        .nav-btn img {
+            height: 104px;
+            width: auto;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: block;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+        }
+        .nav-btn .label {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #2d2418;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.15);
+            font-family: 'Press Start 2P', monospace;
+            image-rendering: pixelated;
+        }
+        .nav-btn:hover .label {
+            color: #1a1208;
+        }
+
+        /* -------- Play highlight -------- */
+        .nav-btn.play-btn img {
+            filter: drop-shadow(0 2px 16px rgba(255, 215, 0, 0.25));
+        }
+        .nav-btn.play-btn:hover {
+            transform: translateY(-4px) scale(1.04);
+        }
+
+        /* -------- RESPONSIVE -------- */
+        @media (max-width: 1400px) {
+            .nav-btn img {
+                height: 84px;
+            }
+            .nav-btn {
+                min-width: 96px;
+                padding: 6px 14px;
+            }
+            .nav-btn .label {
+                font-size: 0.75rem;
+            }
+        }
+        @media (max-width: 1100px) {
+            .nav-btn img {
+                height: 68px;
+            }
+            .nav-btn {
+                min-width: 76px;
+                padding: 4px 10px;
+            }
+            .nav-btn .label {
+                font-size: 0.6rem;
+            }
+            .bottom-nav {
+                gap: 8px;
+                padding: 14px 12px;
+            }
+            .header-title {
+                font-size: 1.6rem;
+            }
+            .stat-compact {
+                font-size: 0.55rem;
+                padding: 4px 10px;
+            }
+            .stat-compact .stat-icon {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 800px) {
+            .nav-btn img {
+                height: 54px;
+            }
+            .nav-btn {
+                min-width: 60px;
+                padding: 4px 8px;
+            }
+            .nav-btn .label {
+                font-size: 0.5rem;
+            }
+            .bottom-nav {
+                gap: 4px;
+                padding: 10px 8px;
+            }
+            .header-title {
+                font-size: 1.3rem;
+            }
+            .header-bar {
+                padding: 16px 20px;
+            }
+            .level-progress-compact {
+                font-size: 0.5rem;
+                padding: 4px 10px;
+            }
+            .level-progress-compact .track {
+                width: 40px;
+            }
+            .stat-compact {
+                font-size: 0.5rem;
+                padding: 4px 8px;
+            }
+            .stat-compact .stat-icon {
+                font-size: 0.6rem;
+            }
+            .resume-btn {
+                font-size: 0.6rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .header-title {
+                font-size: 1.0rem;
+            }
+            .level-progress-compact .track {
+                width: 30px;
+            }
+            .level-progress-compact span:not(.level-text):not(.track) {
+                display: none;
+            }
+            .stat-compact .stat-label {
+                display: none;
+            }
+            .stat-compact {
+                padding: 4px 6px;
+            }
+            .bottom-nav {
+                padding: 6px 4px;
+                gap: 2px;
+            }
+            .nav-btn {
+                min-width: 40px;
+                padding: 2px 4px;
+            }
+            .nav-btn img {
+                height: 36px;
+            }
+            .nav-btn .label {
+                font-size: 0.4rem;
+                display: none;
+            }
+        }
+        @media (max-width: 380px) {
+            .nav-btn {
+                min-width: 32px;
+            }
+            .nav-btn img {
+                height: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-wrapper">
+        <!-- Background Image -->
+        <div class="bg-image"></div>
+
+        <!-- Header Bar -->
+        <div class="header-bar">
+            <div class="header-title">⚔️ SIMPLE TD</div>
+            <div class="header-right">
+                <!-- Gems -->
+                <div class="stat-compact" id="gemDisplay">
+                    <span class="stat-icon">💎</span>
+                    <span class="stat-label">Gems</span>
+                    <span class="stat-value" id="gemCount">0</span>
+                </div>
+                <!-- Shards -->
+                <div class="stat-compact" id="shardDisplay">
+                    <span class="stat-icon">🔮</span>
+                    <span class="stat-label">Shards</span>
+                    <span class="stat-value" id="shardCount">0</span>
+                </div>
+                <!-- Level Progress -->
+                <div class="level-progress-compact" id="levelProgress">
+                    <span class="level-text" id="levelDisplay">Lv.1</span>
+                    <span class="track"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
+                    <span id="levelKillDisplay" style="font-size:0.45rem;opacity:0.6;">0 / 300</span>
+                    <span class="prestige-text" id="prestigeDisplay" style="display:none;"></span>
+                </div>
+                <!-- Resume Button -->
+                <button class="resume-btn" id="resumeBtn">
+                    <span class="status-dot" id="resumeDot"></span>
+                    <span id="resumeText">Resume</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation – PIXEL PERFECT -->
+        <div class="bottom-nav" id="bottomNav">
+            <button class="nav-btn" data-page="shop">
+                <img src="../MISC/Tiles/Menus/Sh.png" alt="Shop">
+                <span class="label">Shop</span>
+            </button>
+            <button class="nav-btn" data-page="bestiary">
+                <img src="../MISC/Tiles/Menus/B.png" alt="Bestiary">
+                <span class="label">Bestiary</span>
+            </button>
+            <button class="nav-btn" data-page="settings">
+                <img src="../MISC/Tiles/Menus/Se.png" alt="Settings">
+                <span class="label">Settings</span>
+            </button>
+
+            <button class="nav-btn play-btn" data-page="play">
+                <img src="../MISC/Tiles/Menus/P.png" alt="Play">
+                <span class="label">Play</span>
+            </button>
+
+            <button class="nav-btn" data-page="music">
+                <img src="../MISC/Tiles/Menus/M.png" alt="Music">
+                <span class="label">Music</span>
+            </button>
+            <button class="nav-btn" data-page="stats">
+                <img src="../MISC/Tiles/Menus/St.png" alt="Stats">
+                <span class="label">Stats</span>
+            </button>
+            <button class="nav-btn" data-page="tutorial">
+                <img src="../MISC/Tiles/Menus/T.png" alt="Tutorial">
+                <span class="label">Tutorial</span>
+            </button>
+            <button class="nav-btn" data-page="achievements">
+                <img src="../MISC/Tiles/Menus/A.png" alt="Achievements">
+                <span class="label">Achievements</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            function navigateTo(page, params) {
+                window.parent.postMessage({ type: 'navigate', page: page, params: params }, '*');
+            }
+
+            // ================================================================
+            // UPDATE STATS (Gems & Shards)
+            // ================================================================
+            function updateStats() {
+                const gems = parseInt(localStorage.getItem('td_totalGems')) || 0;
+                const shards = parseInt(localStorage.getItem('td_shards')) || 0;
+                document.getElementById('gemCount').textContent = gems;
+                document.getElementById('shardCount').textContent = shards;
+            }
+
+            // ================================================================
+            // LEVEL PROGRESS
+            // ================================================================
+            function getKillsRequiredForLevel(level) {
+                if (level <= 1) return 0;
+                let total = 0;
+                for (let i = 2; i <= level; i++) {
+                    let tierI = Math.floor((i - 1) / 10);
+                    total += 300 * (tierI + 1);
+                }
+                return total;
+            }
+            const MAX_LEVEL = 410;
+            const KILLS_FOR_MAX = getKillsRequiredForLevel(MAX_LEVEL);
+            const PRESTIGE_KILLS = 1000000;
+            const MAX_PRESTIGE = 999;
+
+            function getLevelProgress() {
+                const totalKills = parseInt(localStorage.getItem('td_totalKills')) || 0;
+                let playerLevel = parseInt(localStorage.getItem('td_playerLevel')) || 1;
+                let prestigeLevel = parseInt(localStorage.getItem('td_prestigeLevel')) || 0;
+
+                let current = totalKills;
+                let lv = playerLevel;
+                if (lv >= MAX_LEVEL) {
+                    let killsSinceMax = Math.max(0, current - KILLS_FOR_MAX);
+                    let prestige = Math.floor(killsSinceMax / PRESTIGE_KILLS);
+                    if (prestige > MAX_PRESTIGE) prestige = MAX_PRESTIGE;
+                    let progress = (killsSinceMax % PRESTIGE_KILLS) / PRESTIGE_KILLS;
+                    return {
+                        level: lv,
+                        kills: current,
+                        needed: KILLS_FOR_MAX + (prestige + 1) * PRESTIGE_KILLS,
+                        progress: Math.min(1, progress),
+                        prestige: prestige,
+                        isMax: true
+                    };
+                } else {
+                    let needed = getKillsRequiredForLevel(lv + 1);
+                    let currentForLevel = getKillsRequiredForLevel(lv);
+                    let progress = (current - currentForLevel) / (needed - currentForLevel);
+                    return {
+                        level: lv,
+                        kills: current,
+                        needed: needed,
+                        progress: Math.min(1, progress),
+                        prestige: 0,
+                        isMax: false
+                    };
+                }
+            }
+
+            function updateLevelDisplay() {
+                const prog = getLevelProgress();
+                const levelDisplay = document.getElementById('levelDisplay');
+                const levelProgressFill = document.getElementById('levelProgressFill');
+                const levelKillDisplay = document.getElementById('levelKillDisplay');
+                const prestigeDisplay = document.getElementById('prestigeDisplay');
+
+                let levelText = prog.isMax ? `Lv.MAX` : `Lv.${prog.level}`;
+                levelDisplay.textContent = levelText;
+                levelDisplay.style.color = prog.isMax ? '#ffd700' : '#ffd700';
+
+                levelProgressFill.style.width = `${prog.progress * 100}%`;
+
+                if (prog.isMax) {
+                    let killsInPrestige = Math.max(0, prog.kills - KILLS_FOR_MAX - prog.prestige * PRESTIGE_KILLS);
+                    levelKillDisplay.textContent = `${killsInPrestige} / ${PRESTIGE_KILLS}`;
+                    if (prog.prestige > 0) {
+                        prestigeDisplay.style.display = 'inline';
+                        prestigeDisplay.textContent = `⭐ ${prog.prestige}`;
+                    } else {
+                        prestigeDisplay.style.display = 'none';
+                    }
+                } else {
+                    levelKillDisplay.textContent = `${prog.kills} / ${prog.needed}`;
+                    prestigeDisplay.style.display = 'none';
+                }
+            }
+
+            // ================================================================
+            // RESUME BUTTON
+            // ================================================================
+            const resumeBtn = document.getElementById('resumeBtn');
+            const resumeText = document.getElementById('resumeText');
+            const resumeDot = document.getElementById('resumeDot');
+
+            function updateResumeButton() {
+                const diffRecords = JSON.parse(localStorage.getItem('td_difficultyWaveRecords') || '{}');
+                const bestWave = Object.values(diffRecords).reduce((a, b) => Math.max(a, b), 0);
+                if (bestWave > 0) {
+                    resumeBtn.disabled = false;
+                    resumeText.textContent = 'Resume';
+                    resumeDot.className = 'status-dot active';
+                } else {
+                    resumeBtn.disabled = true;
+                    resumeText.textContent = 'No game';
+                    resumeDot.className = 'status-dot inactive';
+                }
+            }
+
+            resumeBtn.addEventListener('click', () => {
+                if (!resumeBtn.disabled) {
+                    const lastDiff = localStorage.getItem('td_difficulty') || 'easy';
+                    navigateTo('game', `mode=continue&difficulty=${lastDiff}`);
+                }
+            });
+
+            // ================================================================
+            // NAV BUTTONS
+            // ================================================================
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = btn.dataset.page;
+                    if (page) {
+                        navigateTo(page);
+                    }
+                });
+            });
+
+            // ================================================================
+            // INIT
+            // ================================================================
+            updateResumeButton();
+            updateStats();
+            updateLevelDisplay();
+
+            setInterval(() => {
+                updateStats();
+                updateLevelDisplay();
+            }, 5000);
+            window.addEventListener('storage', () => {
+                updateStats();
+                updateLevelDisplay();
+            });
+
+            console.log('📓 Menu loaded – pixel style with Gems & Shards!');
+        })();
+    </script>
+
+</body>
+</html>
