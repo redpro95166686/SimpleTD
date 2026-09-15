@@ -1,5 +1,6 @@
 # SimpleTD
 🎮 SIMPLE TD – Tower Defense Game
+=
 ======================================================================
 ======================================================================
 ======================================================================
@@ -23,6 +24,7 @@ Click index.html to play (run in Edge)
 
 
 📌 QUICK START
+
 ======================================================================
 
 🔹 WINDOWS (any browser):
@@ -50,7 +52,9 @@ Click index.html to play (run in Edge)
    4. Press Ctrl+C in the terminal to stop the server.
 
 ======================================================================
+
 💾 SAVE DATA – Backup & Transfer
+=
 ======================================================================
 
 Your game progress is saved automatically to your browser's local storage
@@ -73,7 +77,9 @@ To restore progress:
 📘 For a visual guide, open "SAVE DATA GUIDE.pdf" in the Data/ folder.
 
 ======================================================================
+
 🎵 MUSIC – 5 Tracks Included
+=
 ======================================================================
 
 The game includes these background tracks:
@@ -87,7 +93,9 @@ Music plays automatically after clicking START.
 You can change tracks in the MUSIC page – closing music returns you to the menu.
 
 ======================================================================
+
 🎮 NEW MENU LAYOUT
+=
 ======================================================================
 
 The main menu now features:
@@ -99,7 +107,9 @@ The main menu now features:
 The "Play" button is centered for easy access.
 
 ======================================================================
+
 📖 TUTORIAL
+=
 ======================================================================
 
 The interactive tutorial has been replaced with a clear, text‑based guide
@@ -107,7 +117,9 @@ that explains all game mechanics. It's accessible from the main menu or
 the Play page. Completing it unlocks Easy difficulty.
 
 ======================================================================
+
 🎲 ROGUE‑LIKE MODE
+=
 ======================================================================
 
 Once you unlock all 7 difficulties, the "Rogue‑like Mode" button appears
@@ -122,7 +134,9 @@ Each run starts fresh with only the Archer tower – every 5 waves you
 choose one of three random upgrades. Win by reaching Wave 100!
 
 ======================================================================
+
 ❓ COMMON ISSUES & SOLUTIONS
+=
 ======================================================================
 
 🔸 GAME WON'T OPEN / NOTHING HAPPENS
@@ -173,7 +187,9 @@ choose one of three random upgrades. Win by reaching Wave 100!
    → Use the server method (start.command) instead.
 
 ======================================================================
+
 📁 FOLDER STRUCTURE – DON'T MOVE FILES!
+=
 ======================================================================
 
 your_game_folder/
@@ -216,5 +232,7 @@ your_game_folder/
     └── Projectiles/
 
 ======================================================================
+
 🎯 ENJOY THE GAME!
+=
 ======================================================================
