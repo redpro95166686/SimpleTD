@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Stats</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            color: #f0ece3;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(8, 18, 22, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            padding: 1.8rem 2rem 2rem;
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .stat-card {
+            background: rgba(20, 34, 30, 0.4);
+            border-radius: 1.2rem;
+            padding: 1rem 0.8rem;
+            text-align: center;
+            border: 1px solid rgba(80, 180, 140, 0.08);
+            transition: 0.2s;
+        }
+        .stat-card:hover {
+            border-color: rgba(244, 162, 97, 0.2);
+            transform: translateY(-3px);
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffcd94;
+            line-height: 1.2;
+        }
+        .stat-card .label {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            margin-top: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .icon {
+            font-size: 1.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffcd94;
+            margin: 1.5rem 0 0.8rem 0;
+            border-bottom: 1px solid rgba(255,205,148,0.1);
+            padding-bottom: 0.4rem;
+        }
+
+        .tower-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.8rem;
+        }
+        .tower-stat {
+            background: rgba(20, 34, 30, 0.3);
+            border-radius: 0.8rem;
+            padding: 0.6rem 0.5rem;
+            text-align: center;
+            border: 1px solid rgba(80, 180, 140, 0.06);
+        }
+        .tower-stat .name {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .tower-stat .count {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffcd94;
+        }
+        .tower-stat .sub {
+            font-size: 0.55rem;
+            opacity: 0.4;
+        }
+
+        .difficulty-progress {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .diff-prog {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(20, 34, 30, 0.3);
+            border-radius: 0.8rem;
+            padding: 0.6rem 0.8rem;
+            border-left: 3px solid #3a5a4a;
+        }
+        .diff-prog.unlocked { border-left-color: #ffd700; }
+        .diff-prog .name { font-weight: 600; font-size: 0.8rem; }
+        .diff-prog .wave { font-size: 0.7rem; opacity: 0.5; }
+        .diff-prog .bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            margin-top: 0.3rem;
+            overflow: hidden;
+        }
+        .diff-prog .bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f4a261, #ffd700);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.6rem;
+            opacity: 0.25;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tower-stats { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 STATISTICS</h1>
+        <button class="back-btn" id="backBtn">⬅ BACK</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid" id="quickStats"></div>
+
+    <!-- Tower Stats -->
+    <div class="section-title">🏰 Tower Usage</div>
+    <div class="tower-stats" id="towerStats"></div>
+
+    <!-- Difficulty Progress -->
+    <div class="section-title">⚔️ Difficulty Progress</div>
+    <div class="difficulty-progress" id="difficultyProgress"></div>
+
+    <div class="footer">📊 Stats update automatically as you play</div>
+</div>
+
+<script>
+    // ================================================================
+    // READ STATS FROM localStorage
+    // ================================================================
+
+    function getData(key, fallback) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        try { return JSON.parse(val); } catch(e) { return val; }
+    }
+
+    function intVal(key, fallback) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        return parseInt(val) || fallback;
+    }
+
+    // -------- Quick Stats --------
+    const totalKills = intVal('td_totalKills', 0);
+    const playerLevel = intVal('td_playerLevel', 1);
+    const prestigeLevel = intVal('td_prestigeLevel', 0);
+    const totalGems = intVal('td_totalGems', 1);
+    const shards = intVal('td_shards', 0);
+    const gamesPlayed = intVal('td_gamesPlayed', 0);
+    const totalTowersBuilt = intVal('td_totalTowersBuilt', 0);
+    const totalCoinsEarned = intVal('td_totalCoinsEarned', 0);
+
+    // -------- Unlocked Towers --------
+    const unlockedTowers = getData('td_unlockedTowers', { archer: true });
+    const towerCount = Object.values(unlockedTowers).filter(Boolean).length;
+    const totalTowers = 7;
+
+    // -------- Unlocked Heroes --------
+    const heroUnlocked = getData('td_heroUnlocked', { clacks: false, spoder: false, minifun: false, trae: false });
+    const heroCount = Object.values(heroUnlocked).filter(Boolean).length;
+    const totalHeroes = 4;
+
+    // -------- Difficulty Records --------
+    const diffRecords = getData('td_difficultyWaveRecords', {});
+    const unlockedDiffs = getData('td_unlockedDifficulties', ['easy']);
+
+    // -------- Render Quick Stats --------
+    function renderQuickStats() {
+        const container = document.getElementById('quickStats');
+        const stats = [
+            { icon: '💀', value: totalKills.toLocaleString(), label: 'Total Kills' },
+            { icon: '⭐', value: playerLevel, label: 'Player Level' },
+            { icon: '🏆', value: prestigeLevel, label: 'Prestige' },
+            { icon: '💎', value: totalGems, label: 'Gems' },
+            { icon: '🔮', value: shards, label: 'Shards' },
+            { icon: '🗡️', value: gamesPlayed, label: 'Games Played' },
+            { icon: '🏰', value: totalTowersBuilt, label: 'Towers Built' },
+            { icon: '🪙', value: totalCoinsEarned.toLocaleString(), label: 'Coins Earned' },
+            { icon: '🏹', value: `${towerCount}/${totalTowers}`, label: 'Towers Unlocked' },
+            { icon: '🦸', value: `${heroCount}/${totalHeroes}`, label: 'Heroes Unlocked' }
+        ];
+        container.innerHTML = stats.map(s => `
+            <div class="stat-card">
+                <div class="icon">${s.icon}</div>
+                <div class="value">${s.value}</div>
+                <div class="label">${s.label}</div>
+            </div>
+        `).join('');
+    }
+
+    // -------- Render Tower Stats --------
+    function renderTowerStats() {
+        const container = document.getElementById('towerStats');
+        const towerMaxLevels = getData('td_towerMaxLevels', {});
+        const towerNames = {
+            archer: '🏹 Archer',
+            bomber: '💣 Bomber',
+            poison: '☠️ Venom',
+            dart: '🎯 Dart',
+            farm: '🌾 Farm',
+            sniper: '🔭 Sniper',
+            mage: '🧙 Mage'
+        };
+        const towerKeys = ['archer', 'bomber', 'poison', 'dart', 'farm', 'sniper', 'mage'];
+        container.innerHTML = towerKeys.map(key => {
+            const maxLvl = towerMaxLevels[key] || 1;
+            const unlocked = unlockedTowers[key] || false;
+            return `
+                <div class="tower-stat" style="${unlocked ? '' : 'opacity:0.4;'}">
+                    <div class="name">${towerNames[key] || key}</div>
+                    <div class="count">${unlocked ? `Lv ${maxLvl}` : '🔒'}</div>
+                    <div class="sub">${unlocked ? 'Unlocked' : 'Locked'}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // -------- Render Difficulty Progress --------
+    function renderDifficultyProgress() {
+        const container = document.getElementById('difficultyProgress');
+        const diffLabels = {
+            easy: '🍼 EASY',
+            normal: '🙂 NORMAL',
+            hard: '🔥 HARD',
+            challenger: '🥷 CHALLENGER',
+            death: '💀 DEATH',
+            hell: '👿 HELL',
+            primal: '🦍 PRIMAL'
+        };
+        const maxWave = 200;
+        container.innerHTML = Object.keys(diffLabels).map(key => {
+            const wave = diffRecords[key] || 0;
+            const unlocked = unlockedDiffs.includes(key);
+            const pct = Math.min(100, (wave / maxWave) * 100);
+            return `
+                <div class="diff-prog ${unlocked ? 'unlocked' : ''}">
+                    <div class="name">${diffLabels[key]}</div>
+                    <div class="wave">${unlocked ? `Wave ${wave}` : '🔒 Locked'}</div>
+                    <div class="bar"><div class="fill" style="width:${pct}%;${unlocked ? '' : 'opacity:0.3;'}"></div></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ================================================================
+    // NAVIGATION – BACK TO MENU
+    // ================================================================
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+    });
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    renderQuickStats();
+    renderTowerStats();
+    renderDifficultyProgress();
+
+    console.log('📊 Stats page loaded – back to menu');
+</script>
+</body>
+</html>

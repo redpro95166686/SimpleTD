@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏠 Home</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0c16;
+            font-family: 'Inter', system-ui, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f0ece3;
+        }
+        .menu-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #0a0c16;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #1c3b2f;
+            cursor: default;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* -------- HEADER BAR (top) -------- */
+        .header-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(10,12,22,0.8) 0%, transparent 100%);
+            z-index: 10;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .header-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 3px;
+            pointer-events: none;
+            text-shadow: 0 0 40px rgba(255, 170, 102, 0.12);
+        }
+        .header-right {
+            display: flex;
+            gap: 14px;
+            pointer-events: auto;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        /* -------- LEVEL PROGRESS (compact) -------- */
+        .level-progress-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #ffecb3;
+            pointer-events: none;
+            font-family: monospace;
+            border: 1px solid rgba(255,215,0,0.08);
+        }
+        .level-progress-compact .track {
+            width: 60px;
+            height: 4px;
+            background: #2a3a2a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .level-progress-compact .fill {
+            height: 100%;
+            background: #ffd700;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .level-progress-compact .level-text {
+            min-width: 32px;
+            text-align: center;
+            color: #ffd700;
+        }
+        .level-progress-compact .prestige-text {
+            color: #ff8c00;
+            font-size: 0.55rem;
+            margin-left: 2px;
+        }
+
+        .resume-btn {
+            background: rgba(42, 75, 62, 0.7);
+            border: 2px solid rgba(255,215,0,0.12);
+            padding: 0.45rem 1.5rem;
+            border-radius: 60px;
+            color: #f9e6cf;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(8px);
+            letter-spacing: 0.5px;
+            pointer-events: auto;
+        }
+        .resume-btn:hover:not(:disabled) {
+            background: rgba(42, 75, 62, 0.9);
+            border-color: rgba(255,215,0,0.3);
+            transform: scale(1.02);
+        }
+        .resume-btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .resume-btn .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .resume-btn .status-dot.active {
+            background: #4eff6e;
+            box-shadow: 0 0 8px rgba(78, 255, 110, 0.4);
+        }
+        .resume-btn .status-dot.inactive {
+            background: #555;
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55rem;
+            opacity: 0.12;
+            pointer-events: none;
+            font-family: monospace;
+            letter-spacing: 2px;
+            color: #f0ece3;
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        @media (max-width: 700px) {
+            .header-title { font-size: 1.3rem; }
+            .header-bar { padding: 10px 14px; }
+            .resume-btn { font-size: 0.65rem; padding: 0.25rem 0.9rem; }
+            .level-progress-compact { font-size: 0.55rem; padding: 2px 8px; }
+            .level-progress-compact .track { width: 40px; }
+            .hint { font-size: 0.4rem; bottom: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="menu-wrapper">
+    <canvas id="menuCanvas"></canvas>
+
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="header-title">⚔️ SIMPLE TD</div>
+        <div class="header-right">
+            <!-- Level Progress -->
+            <div class="level-progress-compact" id="levelProgress">
+                <span class="level-text" id="levelDisplay">Lv.1</span>
+                <span class="track"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
+                <span id="levelKillDisplay" style="font-size:0.55rem;opacity:0.6;">0 / 300</span>
+                <span class="prestige-text" id="prestigeDisplay" style="display:none;"></span>
+            </div>
+            <!-- Resume Button -->
+            <button class="resume-btn" id="resumeBtn">
+                <span class="status-dot" id="resumeDot"></span>
+                <span id="resumeText">Resume</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="hint">✧ click the numbered tiles to explore ✧</div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ================================================================
+        // MAP DATA – Continue (9) at rows 6–7, cols 0–1
+        // ================================================================
+        const MAP_STR = [
+            'xxxxxxxxxxxxxxxxxxxxxxxx',
+            'xxxxx44xxxxxxxxxxxxxxxxx',
+            'xxxxx44xxxxxxxxxxxxxxxxx',
+            'x660000000xxxx11xxxxxxxx',
+            'x660xxxxx0xxxx11xxxxxxxx',
+            'xxx000xxx0xxx00000xxxxxx',
+            '99xxx0xxx0xxx0xxx0xxxxxx',
+            '990000x550xxx0xxx0xxxx88',
+            'xxxxxxx550xxx0xxx0000088',
+            'xxxxx00000xxx0xxxxxxxxxx',
+            'xxxxx0xx22xxx033xxxxxxxx',
+            'xxx770xx22xxx033xxxxxxxx',
+            'xxx77000000000xxxxxxxxxx',
+            'xxxxxxxxxxxxxxxxxxxxxxxx'
+        ];
+
+        const COLS = 24, ROWS = 14;
+        let grid = [];
+        for (let r = 0; r < ROWS; r++) {
+            let row = MAP_STR[r];
+            if (row.length < COLS) row = row.padEnd(COLS, 'x');
+            grid.push(row.split(''));
+        }
+
+        const TILE_TO_PAGE = {
+            '1': 'shop', '2': 'bestiary', '3': 'settings',
+            '4': 'music', '5': 'stats', '6': 'tutorial',
+            '7': 'achievements', '8': 'play', '9': 'continue'
+        };
+        const TILE_LABELS = {
+            '1': 'SHOP', '2': 'BESTIARY', '3': 'SETTINGS',
+            '4': 'MUSIC', '5': 'STATS', '6': 'TUTORIAL',
+            '7': 'ACHIEVEMENTS', '8': 'PLAY', '9': 'CONTINUE'
+        };
+        const TILE_IMAGES = {
+            '1': 'Sh.png', '2': 'B.png', '3': 'Se.png',
+            '4': 'M.png', '5': 'St.png', '6': 'T.png',
+            '7': 'A.png', '8': 'P.png', '9': 'F.png'
+        };
+
+        // ================================================================
+        // CANVAS SETUP
+        // ================================================================
+        const canvas = document.getElementById('menuCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        let canvasW, canvasH, tileW, tileH, offsetX, offsetY;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvasW = rect.width;
+            canvasH = rect.height;
+            canvas.width = canvasW;
+            canvas.height = canvasH;
+            ctx.imageSmoothingEnabled = false;
+
+            const margin = 30;
+            const availableW = canvasW - margin * 2;
+            const availableH = canvasH - margin * 2;
+            const tileFromW = availableW / COLS;
+            const tileFromH = availableH / ROWS;
+            const tileSize = Math.floor(Math.min(tileFromW, tileFromH, 72));
+            tileW = tileSize;
+            tileH = tileSize;
+            const totalW = tileW * COLS;
+            const totalH = tileH * ROWS;
+            offsetX = Math.floor((canvasW - totalW) / 2);
+            offsetY = Math.floor((canvasH - totalH) / 2);
+        }
+
+        // ================================================================
+        // IMAGE LOADING
+        // ================================================================
+        const images = {};
+
+        function loadImage(src, key) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => { images[key] = img; resolve(); };
+                img.onerror = () => { images[key] = null; resolve(); };
+                img.src = src;
+            });
+        }
+
+        async function loadAllImages() {
+            const baseGrass = '../MISC/Tiles/Grass/';
+            const grassFiles = ['grass1.png', 'grass2.png', 'grass3.png', 'grass4.png', 'grass5.png'];
+            for (let f of grassFiles) {
+                await loadImage(baseGrass + f, 'grass_' + f);
+            }
+            await loadImage('../MISC/Tiles/Path/path.png', 'path');
+
+            const menuBase = '../MISC/Tiles/Menus/';
+            const menuFiles = ['Sh.png', 'B.png', 'Se.png', 'M.png', 'St.png', 'T.png', 'A.png', 'P.png', 'F.png'];
+            for (let f of menuFiles) {
+                await loadImage(menuBase + f, 'menu_' + f);
+            }
+
+            const charToImageKey = {};
+            for (let ch in TILE_IMAGES) {
+                charToImageKey[ch] = 'menu_' + TILE_IMAGES[ch];
+            }
+            return charToImageKey;
+        }
+
+        // ================================================================
+        // DRAWING
+        // ================================================================
+        let grassImages = [], pathImage = null, charToImage = {}, allLoaded = false;
+
+        function drawMenu() {
+            if (!allLoaded) return;
+            ctx.clearRect(0, 0, canvasW, canvasH);
+            ctx.fillStyle = '#0a0c16';
+            ctx.fillRect(0, 0, canvasW, canvasH);
+
+            const drawn = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (drawn[r][c]) continue;
+                    const ch = grid[r][c];
+                    const x = offsetX + c * tileW;
+                    const y = offsetY + r * tileH;
+
+                    if (ch === 'x') {
+                        const grassIdx = ((r * 7 + c * 13) % grassImages.length);
+                        const img = grassImages[grassIdx];
+                        if (img) ctx.drawImage(img, x, y, tileW, tileH);
+                        else { ctx.fillStyle = '#2a6b4e'; ctx.fillRect(x, y, tileW, tileH); }
+                    } else if (ch === '0') {
+                        if (pathImage) ctx.drawImage(pathImage, x, y, tileW, tileH);
+                        else { ctx.fillStyle = '#6f4f37'; ctx.fillRect(x, y, tileW, tileH); }
+                    } else if (ch >= '1' && ch <= '9') {
+                        // Check for 2x2 block
+                        const canBlock = (r + 1 < ROWS && c + 1 < COLS &&
+                            grid[r][c + 1] === ch &&
+                            grid[r + 1][c] === ch &&
+                            grid[r + 1][c + 1] === ch);
+                        if (canBlock) {
+                            const imgKey = charToImage[ch];
+                            const img = images[imgKey];
+                            if (img) {
+                                ctx.drawImage(img, x, y, tileW * 2, tileH * 2);
+                            } else {
+                                ctx.fillStyle = '#4a2a5e';
+                                ctx.fillRect(x, y, tileW * 2, tileH * 2);
+                                ctx.strokeStyle = '#f4a261';
+                                ctx.lineWidth = 2;
+                                ctx.strokeRect(x, y, tileW * 2, tileH * 2);
+                            }
+                            const label = TILE_LABELS[ch] || '';
+                            ctx.fillStyle = '#f0ece3';
+                            ctx.font = `bold ${Math.max(11, Math.floor(tileW * 0.2))}px 'Inter', sans-serif`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                            ctx.shadowBlur = 10;
+                            ctx.fillText(label, x + tileW, y + tileH * 2 - 5);
+                            ctx.shadowBlur = 0;
+                            drawn[r][c] = true;
+                            drawn[r][c + 1] = true;
+                            drawn[r + 1][c] = true;
+                            drawn[r + 1][c + 1] = true;
+                        } else {
+                            const imgKey = charToImage[ch];
+                            const img = images[imgKey];
+                            if (img) ctx.drawImage(img, x, y, tileW, tileH);
+                            else { ctx.fillStyle = '#4a2a5e'; ctx.fillRect(x, y, tileW, tileH); }
+                            const label = TILE_LABELS[ch] || '';
+                            ctx.fillStyle = '#f0ece3';
+                            ctx.font = `bold ${Math.max(9, Math.floor(tileW * 0.16))}px 'Inter', sans-serif`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                            ctx.shadowBlur = 6;
+                            ctx.fillText(label, x + tileW / 2, y + tileH - 4);
+                            ctx.shadowBlur = 0;
+                            drawn[r][c] = true;
+                        }
+                    } else {
+                        const grassIdx = ((r * 7 + c * 13) % grassImages.length);
+                        const img = grassImages[grassIdx];
+                        if (img) ctx.drawImage(img, x, y, tileW, tileH);
+                        else { ctx.fillStyle = '#2a6b4e'; ctx.fillRect(x, y, tileW, tileH); }
+                    }
+                }
+            }
+
+            // Subtle grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+            ctx.lineWidth = 0.5;
+            for (let r = 0; r <= ROWS; r++) {
+                const y = offsetY + r * tileH;
+                ctx.beginPath();
+                ctx.moveTo(offsetX, y);
+                ctx.lineTo(offsetX + COLS * tileW, y);
+                ctx.stroke();
+            }
+            for (let c = 0; c <= COLS; c++) {
+                const x = offsetX + c * tileW;
+                ctx.beginPath();
+                ctx.moveTo(x, offsetY);
+                ctx.lineTo(x, offsetY + ROWS * tileH);
+                ctx.stroke();
+            }
+        }
+
+        // ================================================================
+        // LEVEL PROGRESS (copied from game logic)
+        // ================================================================
+        function getKillsRequiredForLevel(level) {
+            if (level <= 1) return 0;
+            let total = 0;
+            for (let i = 2; i <= level; i++) {
+                let tierI = Math.floor((i - 1) / 10);
+                total += 300 * (tierI + 1);
+            }
+            return total;
+        }
+        const MAX_LEVEL = 410;
+        const KILLS_FOR_MAX = getKillsRequiredForLevel(MAX_LEVEL);
+        const PRESTIGE_KILLS = 1000000;
+        const MAX_PRESTIGE = 999;
+
+        function getLevelProgress() {
+            const totalKills = parseInt(localStorage.getItem('td_totalKills')) || 0;
+            let playerLevel = parseInt(localStorage.getItem('td_playerLevel')) || 1;
+            let prestigeLevel = parseInt(localStorage.getItem('td_prestigeLevel')) || 0;
+
+            let current = totalKills;
+            let lv = playerLevel;
+            if (lv >= MAX_LEVEL) {
+                let killsSinceMax = Math.max(0, current - KILLS_FOR_MAX);
+                let prestige = Math.floor(killsSinceMax / PRESTIGE_KILLS);
+                if (prestige > MAX_PRESTIGE) prestige = MAX_PRESTIGE;
+                let progress = (killsSinceMax % PRESTIGE_KILLS) / PRESTIGE_KILLS;
+                return {
+                    level: lv,
+                    kills: current,
+                    needed: KILLS_FOR_MAX + (prestige + 1) * PRESTIGE_KILLS,
+                    progress: Math.min(1, progress),
+                    prestige: prestige,
+                    isMax: true
+                };
+            } else {
+                let needed = getKillsRequiredForLevel(lv + 1);
+                let currentForLevel = getKillsRequiredForLevel(lv);
+                let progress = (current - currentForLevel) / (needed - currentForLevel);
+                return {
+                    level: lv,
+                    kills: current,
+                    needed: needed,
+                    progress: Math.min(1, progress),
+                    prestige: 0,
+                    isMax: false
+                };
+            }
+        }
+
+        function updateLevelDisplay() {
+            const prog = getLevelProgress();
+            const levelDisplay = document.getElementById('levelDisplay');
+            const levelProgressFill = document.getElementById('levelProgressFill');
+            const levelKillDisplay = document.getElementById('levelKillDisplay');
+            const prestigeDisplay = document.getElementById('prestigeDisplay');
+
+            let levelText = prog.isMax ? `Lv.MAX` : `Lv.${prog.level}`;
+            levelDisplay.textContent = levelText;
+            levelDisplay.style.color = prog.isMax ? '#ffd700' : '#ffd700';
+
+            levelProgressFill.style.width = `${prog.progress * 100}%`;
+
+            if (prog.isMax) {
+                let killsInPrestige = Math.max(0, prog.kills - KILLS_FOR_MAX - prog.prestige * PRESTIGE_KILLS);
+                levelKillDisplay.textContent = `${killsInPrestige} / ${PRESTIGE_KILLS}`;
+                if (prog.prestige > 0) {
+                    prestigeDisplay.style.display = 'inline';
+                    prestigeDisplay.textContent = `⭐ ${prog.prestige}`;
+                } else {
+                    prestigeDisplay.style.display = 'none';
+                }
+            } else {
+                levelKillDisplay.textContent = `${prog.kills} / ${prog.needed}`;
+                prestigeDisplay.style.display = 'none';
+            }
+        }
+
+        // ================================================================
+        // CLICK HANDLING
+        // ================================================================
+        function getTileFromMouse(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (clientX - rect.left) * scaleX;
+            const my = (clientY - rect.top) * scaleY;
+            const col = Math.floor((mx - offsetX) / tileW);
+            const row = Math.floor((my - offsetY) / tileH);
+            if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+                return { col, row, char: grid[row][col] };
+            }
+            return null;
+        }
+
+        function handleCanvasClick(e) {
+            const pos = getTileFromMouse(e.clientX, e.clientY);
+            if (!pos) return;
+            const ch = pos.char;
+            if (ch >= '1' && ch <= '9') {
+                const page = TILE_TO_PAGE[ch];
+                if (page) {
+                    if (page === 'continue') {
+                        const diffRecords = JSON.parse(localStorage.getItem('td_difficultyWaveRecords') || '{}');
+                        const bestWave = Object.values(diffRecords).reduce((a, b) => Math.max(a, b), 0);
+                        if (bestWave > 0) {
+                            const lastDiff = localStorage.getItem('td_difficulty') || 'easy';
+                            navigateTo('game', `mode=continue&difficulty=${lastDiff}`);
+                        } else {
+                            const btn = document.getElementById('resumeBtn');
+                            btn.textContent = 'No game';
+                            setTimeout(() => updateResumeButton(), 1500);
+                        }
+                    } else {
+                        navigateTo(page);
+                    }
+                }
+            }
+        }
+
+        // ================================================================
+        // NAVIGATION
+        // ================================================================
+        function navigateTo(page, params) {
+            window.parent.postMessage({ type: 'navigate', page: page, params: params }, '*');
+        }
+
+        // ================================================================
+        // RESUME BUTTON
+        // ================================================================
+        const resumeBtn = document.getElementById('resumeBtn');
+        const resumeText = document.getElementById('resumeText');
+        const resumeDot = document.getElementById('resumeDot');
+
+        function updateResumeButton() {
+            const diffRecords = JSON.parse(localStorage.getItem('td_difficultyWaveRecords') || '{}');
+            const bestWave = Object.values(diffRecords).reduce((a, b) => Math.max(a, b), 0);
+            if (bestWave > 0) {
+                resumeBtn.disabled = false;
+                resumeText.textContent = 'Resume';
+                resumeDot.className = 'status-dot active';
+            } else {
+                resumeBtn.disabled = true;
+                resumeText.textContent = 'No game';
+                resumeDot.className = 'status-dot inactive';
+            }
+        }
+
+        resumeBtn.addEventListener('click', () => {
+            if (!resumeBtn.disabled) {
+                const lastDiff = localStorage.getItem('td_difficulty') || 'easy';
+                navigateTo('game', `mode=continue&difficulty=${lastDiff}`);
+            }
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        async function init() {
+            const charToImageMap = await loadAllImages();
+            charToImage = charToImageMap;
+
+            const grassKeys = ['grass_grass1.png', 'grass_grass2.png', 'grass_grass3.png', 'grass_grass4.png', 'grass_grass5.png'];
+            grassImages = grassKeys.map(k => images[k]).filter(img => img !== null && img !== undefined);
+            if (grassImages.length === 0) {
+                const colors = ['#2a6b4e', '#398067', '#4a8a5a', '#3a7a5a', '#1c5a3a'];
+                for (let i = 0; i < 5; i++) {
+                    const c = document.createElement('canvas');
+                    c.width = 32; c.height = 32;
+                    const ctx2 = c.getContext('2d');
+                    ctx2.fillStyle = colors[i % colors.length];
+                    ctx2.fillRect(0, 0, 32, 32);
+                    const img = new Image();
+                    img.src = c.toDataURL();
+                    grassImages.push(img);
+                }
+            }
+
+            pathImage = images['path'] || null;
+
+            allLoaded = true;
+            resizeCanvas();
+            drawMenu();
+
+            updateResumeButton();
+            updateLevelDisplay(); // initial level display
+
+            // Update level every 5 seconds (and on storage changes)
+            setInterval(updateLevelDisplay, 5000);
+            window.addEventListener('storage', updateLevelDisplay);
+
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+            }, { passive: false });
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                drawMenu();
+            });
+        }
+
+        if (document.readyState === 'complete') {
+            init();
+        } else {
+            window.addEventListener('load', init);
+        }
+
+        console.log('📓 Menu with level progress bar loaded.');
+    })();
+</script>
+</body>
+</html>

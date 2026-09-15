@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 Tutorial</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 30% 20%, #0a0c16, #020308);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            color: #f0ece3;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(8, 18, 22, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            padding: 1.8rem 2rem 2rem;
+            border: 1px solid rgba(80, 180, 140, 0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffcd94, #ffaa66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        .progress-tracker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 1rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.03);
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .progress-item.done {
+            border-color: rgba(255,215,0,0.2);
+            background: rgba(255,215,0,0.06);
+        }
+        .progress-item .status { font-size: 0.8rem; }
+        .progress-item .label { opacity: 0.7; }
+        .progress-item.done .label { opacity: 1; color: #ffd700; }
+
+        .tut-section {
+            background: rgba(16, 28, 24, 0.3);
+            border-radius: 1.2rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.6rem;
+            border: 1px solid rgba(80, 180, 140, 0.06);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tut-section:hover {
+            border-color: rgba(244, 162, 97, 0.15);
+        }
+        .tut-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .tut-section .section-header h3 {
+            color: #ffcd94;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .tut-section .section-header .arrow {
+            transition: transform 0.2s;
+            font-size: 0.8rem;
+            opacity: 0.4;
+        }
+        .tut-section .section-header .arrow.open {
+            transform: rotate(180deg);
+        }
+        .tut-section .section-body {
+            display: none;
+            padding-top: 0.6rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            margin-top: 0.6rem;
+            animation: fadeUp 0.2s ease-out;
+        }
+        .tut-section .section-body.open {
+            display: block;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(4px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .tut-section .section-body p {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            line-height: 1.5;
+            margin-bottom: 0.3rem;
+        }
+        .tut-section .section-body .tip {
+            background: rgba(244, 162, 97, 0.06);
+            border-radius: 0.6rem;
+            padding: 0.4rem 0.8rem;
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            border: 1px solid rgba(244, 162, 97, 0.08);
+        }
+        .tut-section .section-body .tip strong { color: #ffcd94; }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+        }
+        .mini-item {
+            background: rgba(20, 34, 30, 0.3);
+            border-radius: 0.6rem;
+            padding: 0.4rem 0.5rem;
+            text-align: center;
+            border: 1px solid rgba(80, 180, 140, 0.04);
+        }
+        .mini-item .icon { font-size: 1.4rem; }
+        .mini-item .name { font-size: 0.7rem; font-weight: 600; }
+        .mini-item .desc { font-size: 0.55rem; opacity: 0.5; }
+
+        .interactive-hint {
+            background: rgba(255,215,0,0.05);
+            border: 1px dashed rgba(255,215,0,0.15);
+            border-radius: 0.8rem;
+            padding: 0.6rem 0.8rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.75rem;
+        }
+        .interactive-hint .emoji { font-size: 1.2rem; }
+
+        .footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.6rem;
+            opacity: 0.25;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            .progress-tracker { gap: 0.4rem; }
+            .progress-item { font-size: 0.6rem; padding: 0.1rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📖 TUTORIAL</h1>
+        <button class="back-btn" id="backBtn">⬅ BACK</button>
+    </div>
+
+    <div class="progress-tracker" id="progressTracker"></div>
+
+    <div id="tutorialSections">
+        <div class="tut-section" data-section="basics">
+            <div class="section-header">
+                <h3>🎯 Basics</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Welcome to SIMPLE TD!</strong> Your goal is to build towers along a path to defeat waves of enemies before they reach the end.</p>
+                <div class="tip"><strong>💡 Quick Start:</strong> Click on any grass tile to open the tower selector, then choose a tower to build. Your first tower starts the game!</div>
+                <div class="interactive-hint">
+                    <span class="emoji">🖱️</span>
+                    <span><strong>Try it now:</strong> Click a grass tile in the game to build your first tower.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="towers">
+            <div class="section-header">
+                <h3>🏰 Towers</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <div class="mini-grid">
+                    <div class="mini-item"><div class="icon">🏹</div><div class="name">Archer</div><div class="desc">Cheap, reliable.</div></div>
+                    <div class="mini-item"><div class="icon">💣</div><div class="name">Bomber</div><div class="desc">Splash damage.</div></div>
+                    <div class="mini-item"><div class="icon">☠️</div><div class="name">Venom</div><div class="desc">Aura poison.</div></div>
+                    <div class="mini-item"><div class="icon">🎯</div><div class="name">Dart</div><div class="desc">Fast, critical.</div></div>
+                    <div class="mini-item"><div class="icon">🌾</div><div class="name">Farm</div><div class="desc">Passive income.</div></div>
+                    <div class="mini-item"><div class="icon">🔭</div><div class="name">Sniper</div><div class="desc">Infinite range.</div></div>
+                    <div class="mini-item"><div class="icon">🧙</div><div class="name">Mage</div><div class="desc">Chain lightning.</div></div>
+                </div>
+                <p><strong>Heroes</strong> – special units that provide unique buffs. Unlock them in the Shop.</p>
+                <div class="tip"><strong>💡 Tip:</strong> Mix tower types for better defense!</div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="enemies">
+            <div class="section-header">
+                <h3>👾 Enemies</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <div class="mini-grid">
+                    <div class="mini-item"><div class="icon">🟢</div><div class="name">Sprout</div><div class="desc">Weak, numerous.</div></div>
+                    <div class="mini-item"><div class="icon">🔵</div><div class="name">Frostling</div><div class="desc">Tanky, slow.</div></div>
+                    <div class="mini-item"><div class="icon">🟠</div><div class="name">Charger</div><div class="desc">Fast, fragile.</div></div>
+                    <div class="mini-item"><div class="icon">🔴</div><div class="name">Brute</div><div class="desc">High HP.</div></div>
+                    <div class="mini-item"><div class="icon">🟣</div><div class="name">Shade</div><div class="desc">Elusive.</div></div>
+                </div>
+                <p><strong>Bosses</strong> appear at waves 40, 80, and 100. They are massive and require focused firepower.</p>
+                <div class="tip"><strong>💡 Tip:</strong> Save up and upgrade your best towers before boss waves!</div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="difficulty">
+            <div class="section-header">
+                <h3>⚔️ Difficulty</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <div class="mini-grid">
+                    <div class="mini-item"><div class="icon">🍼</div><div class="name">EASY</div><div class="desc">Half enemy HP.</div></div>
+                    <div class="mini-item"><div class="icon">🙂</div><div class="name">NORMAL</div><div class="desc">Standard.</div></div>
+                    <div class="mini-item"><div class="icon">🔥</div><div class="name">HARD</div><div class="desc">2x HP, 4x boss HP.</div></div>
+                    <div class="mini-item"><div class="icon">🥷</div><div class="name">CHALLENGER</div><div class="desc">5 lives, towers cost more.</div></div>
+                    <div class="mini-item"><div class="icon">💀</div><div class="name">DEATH</div><div class="desc">Relentless.</div></div>
+                    <div class="mini-item"><div class="icon">👿</div><div class="name">HELL</div><div class="desc">1 life, no enhancements.</div></div>
+                    <div class="mini-item"><div class="icon">🦍</div><div class="name">PRIMAL</div><div class="desc">Quadratic scaling (capped).</div></div>
+                </div>
+                <p><strong>Unlocking</strong> – reach certain wave milestones on easier difficulties to unlock harder ones.</p>
+                <div class="tip"><strong>💡 Tip:</strong> Start on EASY to unlock NORMAL, then work your way up!</div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="controls">
+            <div class="section-header">
+                <h3>⌨️ Controls</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <p><strong>🖱️ Mouse</strong> – click a grass tile to build, click a tower to upgrade/sell.</p>
+                <p><strong>⌨️ Keyboard</strong> – <kbd>P</kbd> to pause/resume, <kbd>Space</kbd> to speed up (hold).</p>
+                <div class="tip"><strong>💡 Tip:</strong> Holding <kbd>Space</kbd> temporarily speeds up the game – great for fast-forwarding through early waves!</div>
+                <div class="interactive-hint">
+                    <span class="emoji">⌨️</span>
+                    <span><strong>Try it:</strong> Press <kbd>P</kbd> in the game to pause, and <kbd>Space</kbd> to boost speed.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="progression">
+            <div class="section-header">
+                <h3>📈 Progression</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Coins 🪙</strong> – earned from kills and wave bonuses. Used to build and upgrade towers.</p>
+                <p><strong>Gems 💎</strong> – earned from wave completions. Used in the Shop to unlock towers and increase max levels.</p>
+                <p><strong>Shards 🔮</strong> – earned every 10 levels. Used in the Shop's Skill Tree to unlock tower upgrades and knowledge.</p>
+                <p><strong>Level & Prestige</strong> – killing enemies gives XP. Reach level 410 to start earning Prestige, the ultimate endgame.</p>
+                <div class="tip"><strong>💡 Tip:</strong> Prestige unlocks special gold/green themes at levels 500 and 750!</div>
+            </div>
+        </div>
+
+        <div class="tut-section" data-section="tips">
+            <div class="section-header">
+                <h3>💡 Strategy</h3>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Early game:</strong> Build Archers near the start of the path.</p>
+                <p><strong>Mid game:</strong> Add Farms for passive income. Upgrade your best towers.</p>
+                <p><strong>Late game:</strong> Use Bombers and Mages for crowd control, Snipers for boss damage.</p>
+                <p><strong>Heroes:</strong> Place your hero early to maximize their leveling potential.</p>
+                <p><strong>Gems:</strong> Unlock new towers and increase max tower levels in the Shop.</p>
+                <p><strong>Shards:</strong> Invest in tower upgrades and knowledge in the Skill Tree.</p>
+                <div class="tip"><strong>💡 Tip:</strong> Check the Bestiary to learn enemy weaknesses!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">📖 Click any section to expand – knowledge is power!</div>
+</div>
+
+<script>
+    // ================================================================
+    // ACCORDION
+    // ================================================================
+    document.querySelectorAll('.tut-section').forEach(section => {
+        const header = section.querySelector('.section-header');
+        const body = section.querySelector('.section-body');
+        const arrow = section.querySelector('.arrow');
+
+        header.addEventListener('click', () => {
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        });
+
+        if (section === document.querySelector('.tut-section')) {
+            body.classList.add('open');
+            arrow.classList.add('open');
+        }
+    });
+
+    // ================================================================
+    // PROGRESS TRACKER
+    // ================================================================
+    function getInt(key, fallback = 0) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        return parseInt(val) || fallback;
+    }
+    function getData(key, fallback) {
+        const val = localStorage.getItem(key);
+        if (val === null || val === undefined) return fallback;
+        try { return JSON.parse(val); } catch(e) { return val; }
+    }
+
+    function updateProgressTracker() {
+        const container = document.getElementById('progressTracker');
+        const towerCount = getInt('td_totalTowersBuilt', 0);
+        const kills = getInt('td_totalKills', 0);
+        const waveBest = (() => {
+            const records = getData('td_difficultyWaveRecords', {});
+            let best = 0;
+            for (let k in records) if (records[k] > best) best = records[k];
+            return best;
+        })();
+        const hasHero = getInt('td_heroPlaced', 0) > 0;
+        const unlockedTowers = getData('td_unlockedTowers', {});
+        const towerCountUnlocked = Object.values(unlockedTowers).filter(Boolean).length;
+        const allTowers = towerCountUnlocked >= 7;
+
+        const items = [
+            { label: 'Build first tower', done: towerCount >= 1 },
+            { label: 'Kill first enemy', done: kills >= 1 },
+            { label: 'Reach Wave 10', done: waveBest >= 10 },
+            { label: 'Reach Wave 40 (boss)', done: waveBest >= 40 },
+            { label: 'Unlock all towers', done: allTowers },
+            { label: 'Place a hero', done: hasHero }
+        ];
+
+        container.innerHTML = items.map(item => `
+            <div class="progress-item ${item.done ? 'done' : ''}">
+                <span class="status">${item.done ? '✅' : '⏳'}</span>
+                <span class="label">${item.label}</span>
+            </div>
+        `).join('');
+    }
+
+    updateProgressTracker();
+    setInterval(updateProgressTracker, 5000);
+
+    // ================================================================
+    // NAVIGATION – BACK TO MENU
+    // ================================================================
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.parent.postMessage({ type: 'navigate', page: 'menu' }, '*');
+    });
+
+    console.log('📖 Interactive tutorial loaded – back to menu');
+</script>
+</body>
+</html>
