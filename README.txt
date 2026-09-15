@@ -1,0 +1,220 @@
+# SimpleTD
+🎮 SIMPLE TD – Tower Defense Game
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+    SIMPLE TD – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+======================================================================
+
+For Windows:
+
+Click index.html to play (run in Edge)
+
+
+📌 QUICK START
+======================================================================
+
+🔹 WINDOWS (any browser):
+   Just double‑click "index.html" – it works in Edge, Chrome, Firefox.
+
+🔹 MAC – CHROME RECOMMENDED:
+   ✅ Double‑click "index.html" – it opens in Chrome and works perfectly!
+   (Chrome on Mac supports localStorage and all game features without a server.)
+
+🔹 MAC – SAFARI USERS:
+   ⚠️ Safari blocks localStorage on file:// URLs – the game won't save progress.
+   To fix this, use the server method below.
+
+🔹 MAC – SERVER METHOD (for Safari or any browser):
+   1. Double‑click "start.command" in this folder.
+   2. If it says "cannot be opened", right‑click → Open With → Terminal.
+   3. A Terminal window opens – this is the game server. Keep it open!
+   4. Open your browser (Safari/Chrome/Edge) and go to: http://localhost:8000
+   5. To stop the game: close the Terminal window or press Ctrl+C.
+
+🔹 LINUX:
+   1. Open a terminal in this folder.
+   2. Run: python3 -m http.server 8000
+   3. Open your browser and go to: http://localhost:8000
+   4. Press Ctrl+C in the terminal to stop the server.
+
+======================================================================
+💾 SAVE DATA – Backup & Transfer
+======================================================================
+
+Your game progress is saved automatically to your browser's local storage
+when you leave the game or every few seconds. To continue your last game,
+click the "Resume" button on the main menu (top‑right) or start a new game
+from the Play page.
+
+To backup or transfer your progress:
+1. Open the game and go to the SETTINGS page.
+2. Click "EXPORT PROGRESS" – copy the text that appears.
+3. Open the "save Data.txt" file in the Data/ folder and paste it.
+4. Save the file.
+
+To restore progress:
+1. Open "save Data.txt" from the Data/ folder and copy all text inside.
+2. In the game, go to SETTINGS → "IMPORT PROGRESS".
+3. Paste the text and click IMPORT – you'll be returned to the menu.
+4. Click "Resume" or start a new game to continue.
+
+📘 For a visual guide, open "SAVE DATA GUIDE.pdf" in the Data/ folder.
+
+======================================================================
+🎵 MUSIC – 5 Tracks Included
+======================================================================
+
+The game includes these background tracks:
+   🎵 Calm Tower Defense    (calm.mp3)
+   🎵 A Quiet Room          (quiet.mp3)
+   🎵 Chill Vibes           (chill.mp3)
+   🎵 Midnight Highway      (highway.mp3)
+   🎵 Watchtower Lullaby    (watchtower.mp3)
+
+Music plays automatically after clicking START.
+You can change tracks in the MUSIC page – closing music returns you to the menu.
+
+======================================================================
+🎮 NEW MENU LAYOUT
+======================================================================
+
+The main menu now features:
+- A full‑screen background image (MISC/Image/menu.jpg)
+- Your current Gems 💎 and Shards 🔮 displayed at the top right
+- A bottom navigation bar with all 8 game pages:
+    Play, Shop, Bestiary, Settings, Music, Stats, Tutorial, Achievements
+
+The "Play" button is centered for easy access.
+
+======================================================================
+📖 TUTORIAL
+======================================================================
+
+The interactive tutorial has been replaced with a clear, text‑based guide
+that explains all game mechanics. It's accessible from the main menu or
+the Play page. Completing it unlocks Easy difficulty.
+
+======================================================================
+🎲 ROGUE‑LIKE MODE
+======================================================================
+
+Once you unlock all 7 difficulties, the "Rogue‑like Mode" button appears
+in the Play menu. Clicking it brings up a difficulty selection screen
+where you can choose between:
+
+   🍀 Normal    – Standard Rogue‑like experience
+   🔥 Hard      – Enemies have 2x HP, 4x boss HP, 0.8x rewards
+   ⚡ Challenger – 1.5x HP, 3x boss HP, 1.1x rewards
+
+Each run starts fresh with only the Archer tower – every 5 waves you
+choose one of three random upgrades. Win by reaching Wave 100!
+
+======================================================================
+❓ COMMON ISSUES & SOLUTIONS
+======================================================================
+
+🔸 GAME WON'T OPEN / NOTHING HAPPENS
+   → Windows: Make sure you double‑clicked "index.html".
+   → Mac: Use Chrome – it works without a server.
+   → Mac/Safari: Use the server method (start.command).
+   → Try a different browser.
+
+🔸 PROGRESS WON'T SAVE / GAME RESETS
+   → Windows: Works in all browsers. If it doesn't save, try Edge.
+   → Mac: Use Chrome (file:// works) OR use the server method.
+   → Safari on Mac: MUST use the server method (start.command).
+   → Make sure you're not in private/incognito mode – localStorage is disabled there.
+
+🔸 CAN'T SWITCH PAGES (Shop, Bestiary, Settings, etc.)
+   → This happens if you opened the file directly in Safari on Mac.
+   → Solution: Use Chrome, OR use the server method (start.command).
+
+🔸 IMAGES NOT LOADING
+   → Make sure the "MISC" folder is in the same location as "index.html".
+   → If you moved the folder, keep the structure exactly as it was.
+   → Check that "MISC/Tiles/Tower/archer.png" exists, etc.
+
+🔸 MUSIC NOT PLAYING
+   → Click the START button first – Chrome blocks autoplay until you interact.
+   → Check that "MISC/Music/" contains: calm.mp3, quiet.mp3, chill.mp3, highway.mp3, watchtower.mp3.
+   → Volume might be muted – click the 🔊 icon to unmute.
+
+🔸 GAME IS SLOW / LAGGING
+   → Close other browser tabs and applications.
+   → Try a different browser.
+   → On older computers, reduce the game window size.
+
+🔸 CAN'T OPEN "start.command" ON MAC
+   → Right‑click the file → Open With → Terminal.
+   → If it still won't open, open Terminal and type:
+        cd (drag the game folder here)
+        chmod +x start.command
+        ./start.command
+
+🔸 "PYTHON NOT FOUND" ERROR (Mac/Linux)
+   → Your system may not have Python installed.
+   → Try: python3 -m http.server 8000 (with the 3).
+   → If still not found, install Python from python.org or use VS Code's Live Server.
+
+🔸 GAME SAYS "CORS ERROR" IN CONSOLE
+   → You opened the file directly in a restrictive browser (Safari).
+   → Use the server method (start.command) instead.
+
+======================================================================
+📁 FOLDER STRUCTURE – DON'T MOVE FILES!
+======================================================================
+
+your_game_folder/
+├── index.html
+├── start.command
+├── README.txt
+├── Data/
+│   ├── SAVE DATA GUIDE.pdf
+│   └── save Data.txt
+├── HTML/
+│   ├── game.html
+│   ├── shop.html
+│   ├── bestiary.html
+│   ├── settings.html
+│   ├── music.html
+│   ├── stats.html
+│   ├── tutorial.html
+│   ├── achievements.html
+│   ├── play.html
+│   ├── learn.html
+│   ├── roguelike.html
+│   ├── roguelikeHard.html
+│   ├── roguelikeChallenger.html
+│   └── roguelike_select.html
+└── MISC/
+    ├── Image/
+    │   └── menu.jpg
+    ├── Music/
+    │   ├── calm.mp3
+    │   ├── quiet.mp3
+    │   ├── chill.mp3
+    │   ├── highway.mp3
+    │   └── watchtower.mp3
+    ├── Tiles/
+    │   ├── Grass/
+    │   ├── Path/
+    │   ├── Menus/
+    │   ├── Tower/
+    │   └── Hero/
+    └── Projectiles/
+
+======================================================================
+🎯 ENJOY THE GAME!
+======================================================================
