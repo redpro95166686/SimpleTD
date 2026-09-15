@@ -77,6 +77,8 @@ The game includes these background tracks:
 Music plays automatically after clicking START.
 You can change tracks in the MUSIC page – closing music returns you to the menu.
 
+TRACKS ARE EXCLUDED FROM ALL RELEASES (do not panic when you don't see them)
+
 ======================================================================
 
 🎮 NEW MENU LAYOUT
