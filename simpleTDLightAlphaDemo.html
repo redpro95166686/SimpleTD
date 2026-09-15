@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 
+    SIMPLE TD Light – Tower Defense Game
+    Created by Seth Frederic Bert Cobbaut
+    © 2026 All Rights Reserved.
+    Unauthorized reproduction or distribution is prohibited.
+-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚔️ Simple TD – Light DEMO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0c16;
+            font-family: 'Inter', system-ui, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            color: #f0ece3;
+        }
+        .canvas-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #030b07;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: #1c3b2f;
+            cursor: crosshair;
+            border-radius: 0;
+            image-rendering: pixelated;
+        }
+
+        .game-header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffecb3;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 215, 0, 0.08);
+        }
+
+        .contact-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            z-index: 26;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            color: #ffecb3;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .contact-btn:hover {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: rgba(255, 215, 0, 0.4);
+            transform: scale(1.03);
+        }
+
+        .game-footer {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 0.45rem;
+            color: #8a8a7a;
+            text-align: center;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            line-height: 1.5;
+            max-width: 92%;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: monospace;
+        }
+
+        .contact-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .contact-modal.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .contact-modal .modal-box {
+            background: linear-gradient(145deg, #1a2e28, #0b1a16);
+            border-radius: 2rem;
+            padding: 2rem 2.5rem;
+            max-width: 520px;
+            width: 100%;
+            border: 2px solid rgba(255, 215, 0, 0.25);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            position: relative;
+        }
+        .contact-modal .modal-box .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+        .contact-modal .modal-box .close-modal:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        .contact-modal .modal-box .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 0.4rem;
+            letter-spacing: 1px;
+        }
+        .contact-modal .modal-box .modal-sub {
+            font-size: 0.9rem;
+            color: #a09080;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.8rem;
+        }
+        .contact-modal .modal-box .modal-body {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #e8ddd0;
+            font-family: monospace;
+            letter-spacing: 0.3px;
+        }
+        .contact-modal .modal-box .modal-body .highlight {
+            color: #ffcd94;
+            font-weight: 600;
+        }
+        .contact-modal .modal-box .modal-body .email {
+            color: #5dade2;
+            font-size: 1.1rem;
+            margin-top: 0.6rem;
+            display: inline-block;
+            padding: 4px 16px;
+            background: rgba(93, 173, 226, 0.08);
+            border-radius: 30px;
+            border: 1px solid rgba(93, 173, 226, 0.15);
+        }
+
+        .hamburger-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            transition: 0.2s;
+        }
+        .hamburger-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .hamburger-btn .line {
+            width: 22px;
+            height: 2px;
+            background: #f0ece3;
+            border-radius: 2px;
+            transition: 0.2s;
+        }
+        .hamburger-btn .line.middle {
+            width: 16px;
+            align-self: flex-start;
+            margin-left: 6px;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 64px;
+            left: 16px;
+            background: rgba(8, 18, 22, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(80, 180, 140, 0.2);
+            border-radius: 12px;
+            padding: 6px;
+            z-index: 20;
+            min-width: 160px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+        .dropdown.open {
+            display: flex;
+        }
+        .dropdown-item {
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #f0ece3;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .dropdown-item:active {
+            transform: scale(0.97);
+        }
+        .dropdown-item .icon {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 4px 8px;
+        }
+
+        .stats-overlay {
+            position: absolute;
+            top: 16px;
+            left: 70px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #ffecb3;
+            display: flex;
+            gap: 14px;
+            z-index: 10;
+            pointer-events: none;
+            font-family: monospace;
+            flex-wrap: wrap;
+        }
+        .stats-overlay span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tower-sidebar {
+            position: fixed;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(8, 18, 22, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(80, 180, 140, 0.2);
+            border-radius: 12px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 15;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            max-height: 90vh;
+            overflow-y: auto;
+            min-width: 70px;
+            align-items: center;
+            pointer-events: auto;
+        }
+        .tower-sidebar::-webkit-scrollbar {
+            width: 3px;
+        }
+        .tower-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+        }
+
+        .tower-slot {
+            width: 60px;
+            padding: 4px 2px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: grab;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            color: #f0ece3;
+            font-size: 0.55rem;
+            font-weight: 600;
+            user-select: none;
+            text-align: center;
+            min-height: 64px;
+            justify-content: center;
+        }
+        .tower-slot:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .tower-slot.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.08);
+        }
+        .tower-slot.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.6);
+        }
+        .tower-slot .tower-icon {
+            font-size: 28px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        .tower-slot .tower-cost {
+            font-size: 0.5rem;
+            opacity: 0.7;
+            margin-top: 1px;
+        }
+        .tower-slot .indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+        .indicator.green {
+            background: #4eff6e;
+            box-shadow: 0 0 6px rgba(78, 255, 110, 0.5);
+        }
+        .indicator.red {
+            background: #ff4444;
+            box-shadow: 0 0 6px rgba(255, 68, 68, 0.4);
+        }
+        .indicator.locked-indicator {
+            background: transparent;
+            border: none;
+            font-size: 0.7rem;
+            line-height: 1;
+            top: 0;
+            right: 0;
+        }
+        .tower-slot.dragging {
+            opacity: 0.3;
+        }
+
+        .tower-popup {
+            position: fixed;
+            background: rgba(8, 18, 22, 0.95);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(244, 162, 97, 0.2);
+            border-radius: 1.2rem;
+            padding: 12px 16px;
+            min-width: 150px;
+            z-index: 90;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+            color: #f0ece3;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            animation: popIn 0.15s ease-out;
+        }
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .tower-popup .popup-close {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            cursor: pointer;
+            opacity: 0.4;
+            font-size: 0.9rem;
+            transition: 0.15s;
+        }
+        .tower-popup .popup-close:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+        .tower-popup .popup-btn {
+            display: inline-block;
+            background: rgba(42, 75, 62, 0.5);
+            border: 1px solid rgba(80, 180, 140, 0.12);
+            border-radius: 0.6rem;
+            padding: 2px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #f0ece3;
+            cursor: pointer;
+            transition: 0.12s;
+            margin: 2px 2px 0 0;
+            user-select: none;
+        }
+        .tower-popup .popup-btn:hover {
+            background: rgba(74, 110, 60, 0.7);
+            border-color: rgba(244, 162, 97, 0.3);
+        }
+        .tower-popup .popup-btn:active {
+            transform: scale(0.95);
+        }
+        .tower-popup .popup-sell {
+            background: rgba(80, 30, 30, 0.4);
+            border-color: rgba(200, 80, 50, 0.15);
+        }
+        .tower-popup .popup-sell:hover {
+            background: rgba(120, 40, 40, 0.6);
+        }
+
+        .coin-popup {
+            position: fixed;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #ffdd88;
+            text-shadow: 0 0 12px rgba(255, 220, 100, 0.3);
+            pointer-events: none;
+            z-index: 400;
+            animation: coinFloat 0.6s ease-out forwards;
+        }
+        @keyframes coinFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-60px) scale(1.2);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .hamburger-btn {
+                top: 10px;
+                left: 10px;
+                width: 34px;
+                height: 34px;
+            }
+            .hamburger-btn .line {
+                width: 18px;
+            }
+            .hamburger-btn .line.middle {
+                width: 14px;
+                margin-left: 4px;
+            }
+            .dropdown {
+                top: 52px;
+                left: 10px;
+                min-width: 140px;
+            }
+            .stats-overlay {
+                font-size: 0.6rem;
+                padding: 3px 10px;
+                gap: 8px;
+                top: 10px;
+                left: 56px;
+            }
+            .tower-sidebar {
+                right: 4px;
+                padding: 6px 4px;
+                min-width: 54px;
+            }
+            .tower-slot {
+                width: 48px;
+                min-height: 52px;
+            }
+            .tower-slot .tower-icon {
+                font-size: 22px;
+            }
+            .tower-slot .tower-cost {
+                font-size: 0.4rem;
+            }
+            .tower-slot .indicator {
+                width: 10px;
+                height: 10px;
+                top: 1px;
+                right: 1px;
+            }
+            .game-header {
+                font-size: 0.7rem;
+                padding: 2px 12px;
+                top: 6px;
+            }
+            .game-footer {
+                font-size: 0.4rem;
+                padding: 2px 8px;
+                bottom: 4px;
+            }
+            .contact-btn {
+                font-size: 0.6rem;
+                padding: 4px 12px;
+                top: 8px;
+                right: 10px;
+            }
+            .contact-modal .modal-box {
+                padding: 1.5rem;
+                max-width: 95%;
+            }
+            .contact-modal .modal-box .modal-title {
+                font-size: 1.2rem;
+            }
+            .contact-modal .modal-box .modal-body {
+                font-size: 0.85rem;
+            }
+            .contact-modal .modal-box .modal-body .email {
+                font-size: 0.9rem;
+            }
+        }
+        @media (max-width: 500px) {
+            .stats-overlay {
+                font-size: 0.5rem;
+                padding: 2px 8px;
+                gap: 4px;
+                top: 8px;
+                left: 50px;
+            }
+            .tower-sidebar {
+                right: 2px;
+                padding: 4px 2px;
+                min-width: 44px;
+                gap: 4px;
+            }
+            .tower-slot {
+                width: 40px;
+                min-height: 44px;
+            }
+            .tower-slot .tower-icon {
+                font-size: 18px;
+            }
+            .tower-slot .tower-cost {
+                display: none;
+            }
+            .tower-slot .indicator {
+                width: 8px;
+                height: 8px;
+                top: 0;
+                right: 0;
+            }
+            .game-header {
+                font-size: 0.55rem;
+                padding: 2px 10px;
+                top: 4px;
+            }
+            .contact-btn {
+                font-size: 0.5rem;
+                padding: 3px 10px;
+                top: 6px;
+                right: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-header">⚔️ Simple TD alpha light FREE DEMO</div>
+
+        <button class="contact-btn" id="contactBtn">📧 Contact</button>
+
+        <div class="contact-modal" id="contactModal">
+            <div class="modal-box">
+                <button class="close-modal" id="closeContactModal">✕</button>
+                <div class="modal-title">📧 Contact</div>
+                <div class="modal-sub">SIMPLE TD – Tower Defense Game</div>
+                <div class="modal-body">
+                    <div style="margin-bottom:0.6rem;">
+                        <span class="highlight">Created by</span><br>
+                        Seth Frederic Bert Cobbaut
+                    </div>
+                    <div style="margin-bottom:0.6rem;">
+                        <span class="highlight">© 2026</span> All Rights Reserved.<br>
+                        Unauthorized reproduction or distribution is prohibited.
+                    </div>
+                    <div style="margin-bottom:0.8rem;">
+                        This is a light simple version of the game.
+                    </div>
+                    <div>
+                        <span class="highlight">For full game / full game release:</span><br>
+                        <span class="email">simpletd@outlook.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-footer">
+            SIMPLE TD – Tower Defense Game<br>
+            Created by Seth Frederic Bert Cobbaut<br>
+            © 2026 All Rights Reserved.<br>
+            Unauthorized reproduction or distribution is prohibited.<br>
+            This is a light simple verison of the game.<br>
+            Contact for full game/full game release at simpletd@outlook.com
+        </div>
+
+        <div class="tower-sidebar" id="towerSidebar"></div>
+
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+            <span class="line"></span>
+            <span class="line middle"></span>
+            <span class="line"></span>
+        </button>
+
+        <div class="dropdown" id="dropdownMenu">
+            <button class="dropdown-item" id="pauseItem"><span class="icon">⏸️</span> Pause</button>
+            <button class="dropdown-item" id="forceWaveItem"><span class="icon">⚔️</span> Force Wave</button>
+            <button class="dropdown-item" id="turboItem"><span class="icon">⏩</span> Toggle Turbo</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="restartItem"><span class="icon">🔄</span> Restart</button>
+        </div>
+
+        <div class="stats-overlay">
+            <span>❤️ <span id="livesDisplay">20</span></span>
+            <span>🌊 <span id="waveDisplay">0</span></span>
+            <span>🪙 <span id="coinDisplay">480</span></span>
+            <span>💀 <span id="killsDisplay">0</span></span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            var a1 = document.getElementById('gameCanvas');
+            var a2 = a1.getContext('2d');
+            a2.imageSmoothingEnabled = false;
+            var a3 = document.getElementById('livesDisplay');
+            var a4 = document.getElementById('waveDisplay');
+            var a5 = document.getElementById('coinDisplay');
+            var a6 = document.getElementById('killsDisplay');
+            var a7 = document.getElementById('towerSidebar');
+
+            var b1 = 24,
+                b2 = 14;
+            var b3, b4;
+            var b5 = 480,
+                b6 = 20;
+            var b7 = b5,
+                b8 = b6,
+                b9 = 0,
+                b10 = 0;
+            var b11 = false,
+                b12 = false;
+            var b13 = false,
+                b14 = false;
+            var b15 = 1.5;
+            var b16 = 6.0,
+                b17 = 1.5;
+
+            var c1 = [];
+            var c2 = [];
+            var c3 = [];
+            var c4 = [];
+            var c5 = [];
+            var c6 = [];
+            var c7 = [],
+                c8 = [],
+                c9 = [];
+            var c10 = 0,
+                c11 = 0,
+                c12 = 0,
+                c13 = 0;
+            var c14 = null;
+            var c15 = -1;
+            var c16 = null;
+            var c17 = null,
+                c18 = false,
+                c19 = false;
+            var c20 = null;
+
+            var d1 = {
+                archer: { n: '🏹 Archer', c: 250, d: 6, r: 135, cd: 178, ud: 3, ur: 12, ucd: 11, uc: 110 },
+                bomber: { n: '💣 Bomber', c: 380, d: 20, r: 140, cd: 0, ud: 6, ur: 18, uc: 150, is: true, si: 1642,
+                    sl: 26000 },
+                poison: { n: '☠️ Venom', c: 400, d: 8, r: 140, cd: 5, ud: 3, ur: 12, uc: 140, ia: true, ai: 650 },
+                dart: { n: '🎯 Dart', c: 384, d: 11, r: 165, cd: 73, ud: 4, ur: 14, uc: 130 },
+                farm: { n: '🌾 Farm', c: 576, d: 0, r: 0, cd: 0, ud: 0, ur: 0, uc: 160, if: true, inc: 14, iv: 3200 },
+                sniper: { n: '🔭 Sniper', c: 500, d: 35, r: 9999, cd: 1440, ud: 10, ur: 0, uc: 200 },
+                mage: { n: '🧙 Mage', c: 450, d: 25, r: 200, cd: 1200, ud: 8, ur: 15, uc: 160, h: 2, cr: 300 }
+            };
+
+            var e1 = [
+                { n: 'Sprout', co: '#7cb518', hm: 0.8, sm: 1.0, rm: 0.85 },
+                { n: 'Frostling', co: '#5dade2', hm: 1.15, sm: 0.85, rm: 1.05 },
+                { n: 'Charger', co: '#e67e22', hm: 0.7, sm: 1.5, rm: 0.95 },
+                { n: 'Brute', co: '#c0392b', hm: 1.9, sm: 0.68, rm: 1.35 },
+                { n: 'Shade', co: '#9b59b6', hm: 1.25, sm: 1.12, rm: 1.15 }
+            ];
+
+            var e2 = {
+                cerberus: { n: 'Cerberus', co: '#ff8c00', ic: '🐕', hm: 8, rm: 5, sm: 0.7, th: 40 },
+                behemoth: { n: 'Behemoth', co: '#8b0000', ic: '🐘', hm: 16, rm: 10, sm: 0.5, th: 80 },
+                titan: { n: 'Titan', co: '#b8860b', ic: '👑', hm: 30, rm: 20, sm: 0.4, th: 100 }
+            };
+
+            function f1(w) { return 1 + Math.floor(w / 3) * 0.15; }
+
+            function f2(w) { return Math.max(0.2, 1 - w * 0.008); }
+
+            function f3(w, t, isBoss, bid) {
+                var h = 24 + Math.floor(w * 1.5);
+                var rw = (22 + w * 0.8) * 0.5 * 0.6;
+                if (isBoss && bid) {
+                    var b = e2[bid];
+                    var hp = Math.floor(h * b.hm * f1(w) * 2);
+                    var rwd = Math.floor(rw * b.rm * (0.5 + f2(w) * 0.5));
+                    var sp = (0.8 + w * 0.008) * b.sm;
+                    return { hp: Math.min(12000, hp), rwd: Math.max(20, rwd), sp: Math.min(1.8, sp), co: b.co, n: b.n,
+                        ic: b.ic };
+                } else {
+                    var ty = e1[t % e1.length];
+                    var hp2 = Math.floor(h * ty.hm * f1(w));
+                    var rwd2 = Math.floor(rw * ty.rm * f2(w));
+                    var sp2 = (0.8 + w * 0.008) * ty.sm;
+                    return { hp: Math.min(880, hp2), rwd: Math.max(5, rwd2), sp: Math.min(2.2, sp2), co: ty.co, n: ty.n,
+                        ic: '' };
+                }
+            }
+
+            function f4(w) {
+                if (w === 40) return { ib: true, bid: 'cerberus' };
+                if (w === 80) return { ib: true, bid: 'behemoth' };
+                if (w === 100) return { ib: true, bid: 'titan' };
+                var r = Math.random();
+                if (w >= 110 && r < 0.15) return { ib: false, bt: 'cerberus' };
+                if (w >= 150 && r < 0.1) return { ib: false, bt: 'behemoth' };
+                if (w >= 200 && r < 0.08) return { ib: false, bt: 'titan' };
+                return { ib: false, nt: Math.floor(Math.random() * e1.length) };
+            }
+
+            function f5() {
+                var mn = 30,
+                    mx = 35,
+                    att = 800;
+                var p = null;
+                for (var a = 0; a < att; a++) {
+                    var sy = Math.floor(b2 / 2) + (Math.random() < 0.5 ? 0 : (Math.random() < 0.5 ? 1 : -1));
+                    sy = Math.min(b2 - 2, Math.max(1, sy));
+                    var tst = [{ x: 0, y: sy }];
+                    var cx = 0,
+                        cy = sy;
+                    var vis = new Set('0,' + sy);
+                    var st = false;
+                    for (var s = 0; s < 200 && !st; s++) {
+                        var r = Math.random(),
+                            dx = 0,
+                            dy = 0;
+                        if (r < 0.50) dx = 1;
+                        else if (r < 0.58) dx = -1;
+                        else if (r < 0.79) dy = -1;
+                        else dy = 1;
+                        var nx = Math.min(b1 - 1, Math.max(0, cx + dx));
+                        var ny = Math.min(b2 - 2, Math.max(1, cy + dy));
+                        var key = nx + ',' + ny;
+                        var tries = 0;
+                        while (vis.has(key) && tries < 8) {
+                            tries++;
+                            var opts = [];
+                            if (cx + 1 < b1) opts.push({ x: cx + 1, y: cy });
+                            if (cy + 1 < b2 - 1) opts.push({ x: cx, y: cy + 1 });
+                            if (cy - 1 > 0) opts.push({ x: cx, y: cy - 1 });
+                            if (cx - 1 >= 0) opts.push({ x: cx - 1, y: cy });
+                            opts.sort(function() { return Math.random() - 0.5; });
+                            var found = false;
+                            for (var oi = 0; oi < opts.length; oi++) {
+                                var k2 = opts[oi].x + ',' + opts[oi].y;
+                                if (!vis.has(k2)) { nx = opts[oi].x;
+                                    ny = opts[oi].y;
+                                    found = true; break; }
+                            }
+                            if (!found) { st = true; break; }
+                            key = nx + ',' + ny;
+                        }
+                        if (st) break;
+                        cx = nx;
+                        cy = ny;
+                        if (!vis.has(key)) { vis.add(key);
+                            tst.push({ x: cx, y: cy }); }
+                        if (cx === b1 - 1) break;
+                    }
+                    if (cx === b1 - 1 && tst.length >= mn && tst.length <= mx) { p = tst; break; }
+                }
+                if (!p) {
+                    p = [{ x: 0, y: Math.floor(b2 / 2) }];
+                    for (var i2 = 1; i2 < b1; i2++) {
+                        var yy = p[i2 - 1].y + (Math.random() < 0.5 ? 1 : -1);
+                        yy = Math.min(b2 - 2, Math.max(1, yy));
+                        p.push({ x: i2, y: yy });
+                    }
+                }
+                p[0].x = 0;
+                p[p.length - 1].x = b1 - 1;
+                var uniq = [];
+                for (var ui = 0; ui < p.length; ui++) {
+                    if (uniq.length === 0 || uniq[uniq.length - 1].x !== p[ui].x || uniq[uniq.length - 1].y !== p[ui].y) {
+                        uniq.push(p[ui]);
+                    }
+                }
+                for (var ci = 1; ci < uniq.length; ci++) {
+                    var dx2 = Math.abs(uniq[ci].x - uniq[ci - 1].x);
+                    var dy2 = Math.abs(uniq[ci].y - uniq[ci - 1].y);
+                    if (dx2 + dy2 !== 1) {
+                        var mx2 = (uniq[ci].x + uniq[ci - 1].x) / 2;
+                        var my2 = (uniq[ci].y + uniq[ci - 1].y) / 2;
+                        uniq.splice(ci, 0, { x: Math.round(mx2), y: Math.round(my2) });
+                    }
+                }
+                return uniq;
+            }
+
+            function f6(col, row) {
+                return !c1.some(function(p) { return p.x === col && p.y === row; });
+            }
+
+            function f7(type, lv) {
+                var b = d1[type];
+                var dmg = b.d + (lv - 1) * b.ud;
+                var rng = b.r + (lv - 1) * b.ur;
+                var cd = b.cd;
+                if (type === 'archer') cd = Math.max(35, b.cd - (lv - 1) * b.ucd);
+                else if (type === 'sniper') cd = Math.max(200, b.cd - (lv - 1) * 20);
+                else if (type !== 'bomber' && type !== 'farm' && type !== 'poison' && type !== 'mage')
+                    cd = Math.max(15, b.cd - (lv - 1) * 1.5);
+                return { dmg: dmg, rng: rng, cd: cd };
+            }
+
+            function f8(col, row, type) {
+                if (!f6(col, row)) return false;
+                if (c3.some(function(t) { return t.col === col && t.row === row; })) return false;
+                var data = d1[type];
+                if (b7 < data.c) { f9('Need ' + data.c + ' coins'); return false; }
+                b7 -= data.c;
+                var t = { col: col, row: row, type: type, lv: 1, cd: 0, fi: null, ai: null, si: null };
+                c3.push(t);
+                var idx = c3.length - 1;
+                c7.push(0);
+                c8.push(0);
+                c9.push(0);
+                if (type === 'farm') f10(idx);
+                if (type === 'poison') f11(idx);
+                if (type === 'bomber') f12(idx);
+                f9('Built ' + data.n + ' Lv1');
+                f13();
+                f14();
+                if (c3.length === 1 && !b11 && !b12) f15();
+                return true;
+            }
+
+            function f16(idx) {
+                var t = c3[idx];
+                if (!t) return;
+                var data = d1[t.type];
+                var cost = data.uc + (t.lv - 1) * 25;
+                if (b7 < cost) { f9('Need ' + cost + ' coins'); return; }
+                b7 -= cost;
+                t.lv++;
+                if (t.type === 'farm') { if (t.fi) clearInterval(t.fi);
+                    f10(idx); }
+                if (t.type === 'poison') { if (t.ai) clearInterval(t.ai);
+                    f11(idx); }
+                if (t.type === 'bomber') { if (t.si) clearInterval(t.si);
+                    f12(idx); }
+                f9('Upgraded to Lv' + t.lv);
+                f13();
+                f14();
+                f17();
+                f18(idx);
+            }
+
+            function f19(idx) {
+                var t = c3[idx];
+                if (!t) return;
+                var ref = Math.floor((d1[t.type].c + (t.lv - 1) * d1[t.type].uc * 0.6) * 0.6);
+                b7 += ref;
+                if (t.fi) clearInterval(t.fi);
+                if (t.ai) clearInterval(t.ai);
+                if (t.si) clearInterval(t.si);
+                c3.splice(idx, 1);
+                c7.splice(idx, 1);
+                c8.splice(idx, 1);
+                c9.splice(idx, 1);
+                if (c15 === idx) c15 = -1;
+                else if (c15 > idx) c15--;
+                f17();
+                f9('Sold +' + ref + ' coins');
+                f13();
+                f14();
+            }
+
+            function f10(idx) {
+                var t = c3[idx];
+                if (!t || t.type !== 'farm') return;
+                if (t.fi) clearInterval(t.fi);
+                var inc = d1.farm.inc + (t.lv - 1) * 4;
+                var iv = d1.farm.iv;
+                t.fi = setInterval(function() {
+                    if (b11 && !b12 && !b13) {
+                        b7 += inc;
+                        c9[idx] += inc;
+                        f13();
+                        var rect = a1.getBoundingClientRect();
+                        var x = t.col * b3 + b3 / 2,
+                            y = t.row * b4 + b4 / 2;
+                        var sx = rect.left + (x / (a1.width / rect.width)),
+                            sy = rect.top + (y / (a1.width / rect.width));
+                        var div = document.createElement('div');
+                        div.className = 'coin-popup';
+                        div.innerText = '+' + inc;
+                        div.style.left = sx + 'px';
+                        div.style.top = sy + 'px';
+                        document.body.appendChild(div);
+                        setTimeout(function() { div.remove(); }, 800);
+                    }
+                }, iv);
+            }
+
+            function f11(idx) {
+                var t = c3[idx];
+                if (!t || t.type !== 'poison') return;
+                if (t.ai) clearInterval(t.ai);
+                var dmg = d1.poison.d + (t.lv - 1) * d1.poison.ud;
+                var rad = d1.poison.r + (t.lv - 1) * d1.poison.ur;
+                t.ai = setInterval(function() {
+                    if (!b11 || b12 || b13) return;
+                    var tx = t.col * b3 + b3 / 2,
+                        ty = t.row * b4 + b4 / 2;
+                    for (var i = 0; i < c2.length; i++) {
+                        var e = c2[i];
+                        if (Math.hypot(e.x - tx, e.y - ty) <= rad) {
+                            e.hp -= dmg;
+                            if (e.hp <= 0) f20(i, idx);
+                        }
+                    }
+                    f14();
+                }, d1.poison.ai);
+            }
+
+            function f12(idx) {
+                var t = c3[idx];
+                if (!t || t.type !== 'bomber') return;
+                if (t.si) clearInterval(t.si);
+                var iv = Math.max(700, d1.bomber.si - (t.lv - 1) * 60);
+                t.si = setInterval(function() {
+                    if (!b11 || b12 || b13) return;
+                    var rng = d1.bomber.r + (t.lv - 1) * d1.bomber.ur;
+                    var tx = t.col * b3 + b3 / 2,
+                        ty = t.row * b4 + b4 / 2;
+                    var valid = c1.filter(function(cell) {
+                        var cx = cell.x * b3 + b3 / 2,
+                            cy = cell.y * b4 + b4 / 2;
+                        return Math.hypot(cx - tx, cy - ty) <= rng;
+                    });
+                    if (!valid.length) return;
+                    var target = valid[Math.floor(Math.random() * valid.length)];
+                    var dmg = d1.bomber.d + (t.lv - 1) * d1.bomber.ud;
+                    c5.push({ x: target.x, y: target.y, dmg: dmg, life: d1.bomber.sl, tid: idx });
+                    f14();
+                }, iv);
+            }
+
+            function f15() {
+                if (c1.length === 0) return;
+                var start = c1[0];
+                c17 = { x: start.x * b3 + b3 / 2, y: start.y * b4 + b4 / 2, wp: 1, done: false };
+                b11 = true;
+                b10 = 0;
+                c19 = false;
+                c18 = false;
+                f9('Scout wave started');
+                f13();
+                f14();
+            }
+
+            function f21(delta) {
+                if (!c17 || c17.done) return;
+                if (c17.wp >= c1.length) {
+                    c17.done = true;
+                    c18 = true;
+                    b11 = false;
+                    f9('Flag planted!');
+                    if (!b12 && b8 > 0) {
+                        b10 = 1;
+                        setTimeout(function() { f22(); }, 500);
+                    }
+                    f14();
+                    return;
+                }
+                var target = c1[c17.wp];
+                var tx = target.x * b3 + b3 / 2,
+                    ty = target.y * b4 + b4 / 2;
+                var dx = tx - c17.x,
+                    dy = ty - c17.y,
+                    dist = Math.hypot(dx, dy);
+                var spd = 0.22 * (delta / 16);
+                if (dist < spd) {
+                    c17.x = tx;
+                    c17.y = ty;
+                    c17.wp++;
+                } else {
+                    var ang = Math.atan2(dy, dx);
+                    c17.x += Math.cos(ang) * spd;
+                    c17.y += Math.sin(ang) * spd;
+                }
+                f14();
+            }
+
+            function f22() {
+                if (b12 || b11) return;
+                if (!c19 && b10 === 0) return;
+                b11 = true;
+                var cnt = 4 + Math.floor(b10 * 0.8);
+                if (b10 === 40 || b10 === 80 || b10 === 100) cnt = 1;
+                c10 = cnt;
+                c11 = 0;
+                c12 = 0;
+                c13 = 0;
+                f9('Wave ' + b10 + ' — ' + cnt + ' enemies');
+                f13();
+                for (var i = 0; i < c3.length; i++) {
+                    if (c3[i].type === 'farm') f10(i);
+                    if (c3[i].type === 'poison') f11(i);
+                    if (c3[i].type === 'bomber') f12(i);
+                }
+                f14();
+            }
+
+            function f23(v) {
+                b11 = false;
+                if (v) {
+                    var bonus = Math.floor((70 + b10 * 3) * 0.5);
+                    b7 += bonus;
+                    f9('Wave ' + b10 + ' clear! +' + bonus + ' coins');
+                    if (b10 >= 100 && !b12) {
+                        f9('🎉 You reached Wave 100! Victory!');
+                    }
+                    f13();
+                    if (c20) clearTimeout(c20);
+                    c20 = setTimeout(function() {
+                        if (!b11 && !b12 && b8 > 0 && !b13) {
+                            b10++;
+                            f22();
+                        }
+                    }, 3000);
+                }
+                c2 = [];
+                c4 = [];
+                c5 = [];
+                f14();
+            }
+
+            function f24() {
+                b12 = true;
+                b11 = false;
+                f9('💀 Game Over at wave ' + b10);
+                f14();
+            }
+
+            function f25() {
+                if (!b11 && !b12 && b8 > 0) {
+                    if (!c19 && b10 === 0) { f9('Scout not done'); return; }
+                    if (b10 === 0 && c19) b10 = 1;
+                    f22();
+                }
+            }
+
+            function f26() {
+                if (c10 <= 0 || !b11 || b12 || b13) return;
+                var start = c1[0];
+                var dec = f4(b10);
+                var st;
+                if (dec.ib) {
+                    st = f3(b10, 0, true, dec.bid);
+                } else if (dec.bt) {
+                    var boss = e2[dec.bt];
+                    var hp = Math.floor((24 + Math.floor(b10 * 1.5)) * boss.hm * 0.4 * f1(b10) * 2);
+                    var rwd = Math.floor((22 + b10 * 0.8) * 0.5 * 0.6 * boss.rm * 0.3 * f2(b10));
+                    var spd = (0.8 + b10 * 0.008) * boss.sm * 1.1;
+                    st = { hp: Math.min(6000, hp), rwd: Math.max(10, rwd), sp: Math.min(1.9, spd), co: boss.co, n: boss
+                            .n, ic: boss.ic };
+                } else {
+                    st = f3(b10, dec.nt);
+                }
+                c2.push({
+                    wp: 1,
+                    hp: st.hp,
+                    mx: st.hp,
+                    rwd: st.rwd,
+                    sp: st.sp,
+                    x: start.x * b3 + b3 / 2,
+                    y: start.y * b4 + b4 / 2,
+                    co: st.co,
+                    n: st.n || 'Enemy',
+                    ic: st.ic || '',
+                    stun: 0,
+                    slow: 0,
+                    slowAmt: 0,
+                    pt: 0,
+                    pd: 0
+                });
+                c10--;
+                if (c12 > 0) c12--;
+                f14();
+            }
+
+            function f27(delta) {
+                if (b13 || !b11 || b12) return;
+                if (c19 && b10 === 0) return;
+                if (c10 <= 0 && c12 === 0) return;
+                if (b10 >= 5) {
+                    if (c12 > 0) {
+                        c11 += delta;
+                        if (c11 >= 80) { c11 = 0;
+                            f26(); }
+                    } else if (c10 > 0) {
+                        if (c13 <= 0) {
+                            var sz = Math.min(c10, 3 + Math.floor(Math.random() * 3));
+                            c12 = sz;
+                            c13 = 1500;
+                        } else {
+                            c13 -= delta;
+                        }
+                    }
+                } else {
+                    if (c10 > 0) {
+                        c11 += delta;
+                        if (c11 >= (300 + Math.random() * 700)) { c11 = 0;
+                            f26(); }
+                    }
+                }
+            }
+
+            function f20(idx, tid) {
+                var e = c2[idx];
+                if (!e) return;
+                var rw = e.rwd;
+                b7 += rw;
+                b9++;
+                if (tid !== undefined && tid >= 0 && c3[tid]) {
+                    c7[tid] = (c7[tid] || 0) + 1;
+                    c8[tid] = (c8[tid] || 0) + e.mx;
+                }
+                c2.splice(idx, 1);
+                f13();
+                if (c2.length === 0 && c10 === 0 && c12 === 0 && b11) {
+                    f23(true);
+                }
+                f14();
+            }
+
+            function f28(delta) {
+                if (!b11 || b13 || b12) return;
+                var mv = 0.22 * (delta / 16);
+                for (var i = 0; i < c2.length; i++) {
+                    var e = c2[i];
+                    if (e.stun > 0) { e.stun -= delta; continue; }
+                    if (e.pt > 0) {
+                        e.hp -= e.pd * (delta / 1000);
+                        e.pt -= delta;
+                        if (e.hp <= 0) { f20(i); continue; }
+                    }
+                    var smod = 1;
+                    if (e.slow > 0) {
+                        smod = 1 - (e.slowAmt || 0);
+                        e.slow -= delta;
+                        if (e.slow < 0) e.slow = 0;
+                    }
+                    var stp = e.sp * mv * smod;
+                    if (e.wp >= c1.length) {
+                        b8--;
+                        c2.splice(i, 1);
+                        i--;
+                        f13();
+                        if (b8 <= 0) f24();
+                        continue;
+                    }
+                    var target = c1[e.wp];
+                    var tx = target.x * b3 + b3 / 2,
+                        ty = target.y * b4 + b4 / 2;
+                    var dx = tx - e.x,
+                        dy = ty - e.y,
+                        dist = Math.hypot(dx, dy);
+                    if (dist < stp) {
+                        e.x = tx;
+                        e.y = ty;
+                        e.wp++;
+                    } else {
+                        var ang = Math.atan2(dy, dx);
+                        e.x += Math.cos(ang) * stp;
+                        e.y += Math.sin(ang) * stp;
+                    }
+                }
+                f14();
+            }
+
+            function f29(delta) {
+                for (var i = 0; i < c3.length; i++) {
+                    var t = c3[i];
+                    if (t.type === 'farm' || t.type === 'poison' || t.type === 'bomber') continue;
+                    if (t.cd > 0) { t.cd -= delta; continue; }
+                    var st = f7(t.type, t.lv);
+                    var tx = t.col * b3 + b3 / 2,
+                        ty = t.row * b4 + b4 / 2;
+                    var targets = [];
+                    for (var ei = 0; ei < c2.length; ei++) {
+                        var e = c2[ei];
+                        var d = Math.hypot(e.x - tx, e.y - ty);
+                        if (d < st.rng && e.hp > 0) targets.push({ e: e, idx: ei, dist: d });
+                    }
+                    targets.sort(function(a, b) { return a.dist - b.dist; });
+                    var maxT = (t.type === 'archer') ? 1 : 1;
+                    var toAtk = targets.slice(0, maxT);
+                    for (var ai = 0; ai < toAtk.length; ai++) {
+                        var tg = toAtk[ai];
+                        t.cd = st.cd;
+                        var proj = {
+                            x: tx,
+                            y: ty,
+                            target: tg.e,
+                            dmg: st.dmg,
+                            spd: 5.8,
+                            tid: i,
+                            type: t.type,
+                            hits: (t.type === 'mage') ? (d1.mage.h || 2) : 1,
+                            cr: (t.type === 'mage') ? d1.mage.cr : 0
+                        };
+                        c4.push(proj);
+                    }
+                }
+                f14();
+            }
+
+            function f30(delta) {
+                var sm = delta / 16;
+                for (var i = 0; i < c4.length; i++) {
+                    var p = c4[i];
+                    if (p.dx !== undefined && p.dx !== null) {
+                        p.x += p.dx * p.spd * sm;
+                        p.y += p.dy * p.spd * sm;
+                        p.life -= delta;
+                        var hit = false;
+                        for (var ei2 = 0; ei2 < c2.length; ei2++) {
+                            var e2b = c2[ei2];
+                            if (Math.hypot(e2b.x - p.x, e2b.y - p.y) < 15) {
+                                e2b.hp -= p.dmg;
+                                if (p.poison) { e2b.pt = (e2b.pt || 0) + 1000;
+                                    e2b.pd = (e2b.pd || 0) + p.poison; }
+                                if (e2b.hp <= 0) f20(ei2, p.tid);
+                                hit = true;
+                                break;
+                            }
+                        }
+                        if (hit || p.life <= 0 || p.x < 0 || p.y < 0 || p.x > a1.width || p.y > a1.height) {
+                            c4.splice(i, 1);
+                            i--;
+                        }
+                        continue;
+                    }
+                    if (!p.target || p.target.hp <= 0) {
+                        if (p.type === 'mage' && p.hits > 0) {
+                            var best = null,
+                                bestD = Infinity;
+                            var tx2 = p.x,
+                                ty2 = p.y;
+                            for (var ei3 = 0; ei3 < c2.length; ei3++) {
+                                var e3 = c2[ei3];
+                                if (e3.hp <= 0) continue;
+                                var d2 = Math.hypot(e3.x - tx2, e3.y - ty2);
+                                if (d2 < p.cr && d2 < bestD) { bestD = d2;
+                                    best = { e: e3, idx: ei3 }; }
+                            }
+                            if (best) { p.target = best.e;
+                                p.hits--; continue; } else { c4.splice(i, 1);
+                                i--; continue; }
+                        } else {
+                            c4.splice(i, 1);
+                            i--;
+                            continue;
+                        }
+                    }
+                    var dx3 = p.target.x - p.x,
+                        dy3 = p.target.y - p.y;
+                    var dist2 = Math.hypot(dx3, dy3);
+                    var step = p.spd * sm;
+                    if (dist2 < step) {
+                        var idx2 = c2.indexOf(p.target);
+                        if (idx2 !== -1) {
+                            p.target.hp -= p.dmg;
+                            if (p.poison) { p.target.pt = (p.target.pt || 0) + 1000;
+                                p.target.pd = (p.target.pd || 0) + p.poison; }
+                            if (p.target.hp <= 0) f20(idx2, p.tid);
+                            if (p.type === 'mage' && p.hits > 0) {
+                                var tx3 = p.x,
+                                    ty3 = p.y;
+                                var best2 = null,
+                                    bestD2 = Infinity;
+                                for (var ei4 = 0; ei4 < c2.length; ei4++) {
+                                    var e4 = c2[ei4];
+                                    if (e4.hp <= 0) continue;
+                                    var d3 = Math.hypot(e4.x - tx3, e4.y - ty3);
+                                    if (d3 < p.cr && d3 < bestD2) { bestD2 = d3;
+                                        best2 = { e: e4, idx: ei4 }; }
+                                }
+                                if (best2) { p.target = best2.e;
+                                    p.hits--;
+                                    p.x = p.target.x;
+                                    p.y = p.target.y; continue; }
+                            }
+                        }
+                        c4.splice(i, 1);
+                        i--;
+                    } else {
+                        var ang2 = Math.atan2(dy3, dx3);
+                        p.x += Math.cos(ang2) * step;
+                        p.y += Math.sin(ang2) * step;
+                    }
+                }
+                f14();
+            }
+
+            function f31(delta) {
+                for (var i = 0; i < c5.length; i++) {
+                    var s = c5[i];
+                    s.life -= delta;
+                    if (s.life <= 0) { c5.splice(i, 1);
+                        i--; continue; }
+                    var trig = false;
+                    for (var ei5 = 0; ei5 < c2.length; ei5++) {
+                        var e5 = c2[ei5];
+                        var ex = Math.floor(e5.x / b3),
+                            ey = Math.floor(e5.y / b4);
+                        if (ex === s.x && ey === s.y) { trig = true; break; }
+                    }
+                    if (trig) {
+                        var dmg2 = s.dmg,
+                            tid2 = s.tid;
+                        c5.splice(i, 1);
+                        i--;
+                        var rad2 = Math.min(b3, b4) * 0.6;
+                        c6.push({ x: s.x * b3 + b3 / 2, y: s.y * b4 + b4 / 2, rad: rad2, life: 1.0, max: 1.0 });
+                        for (var ei6 = c2.length - 1; ei6 >= 0; ei6--) {
+                            var e6 = c2[ei6];
+                            var ex2 = Math.floor(e6.x / b3),
+                                ey2 = Math.floor(e6.y / b4);
+                            if (Math.abs(ex2 - s.x) <= 1 && Math.abs(ey2 - s.y) <= 1) {
+                                e6.hp -= dmg2;
+                                if (e6.hp <= 0) f20(ei6, tid2);
+                            }
+                        }
+                    }
+                }
+                for (var i2 = 0; i2 < c6.length; i2++) {
+                    var exp = c6[i2];
+                    exp.life -= 0.03 * (delta / 16);
+                    exp.rad *= 1.02;
+                    if (exp.life <= 0) { c6.splice(i2, 1);
+                        i2--; }
+                }
+                f14();
+            }
+
+            function f13() {
+                a3.textContent = b8;
+                a4.textContent = b10;
+                a5.textContent = Math.floor(b7);
+                a6.textContent = b9;
+                f32();
+            }
+
+            function f32() {
+                a7.innerHTML = '';
+                var keys = Object.keys(d1);
+                for (var ki = 0; ki < keys.length; ki++) {
+                    var type = keys[ki];
+                    var data = d1[type];
+                    var slot = document.createElement('div');
+                    slot.className = 'tower-slot';
+                    slot.dataset.type = type;
+                    slot.draggable = true;
+                    slot.addEventListener('dragstart', function(e) {
+                        e.dataTransfer.setData('text/plain', this.dataset.type);
+                        this.classList.add('dragging');
+                    });
+                    slot.addEventListener('dragend', function() {
+                        this.classList.remove('dragging');
+                    });
+                    slot.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var ty = this.dataset.type;
+                        if (c14 === ty) {
+                            c14 = null;
+                            this.classList.remove('selected');
+                        } else {
+                            document.querySelectorAll('.tower-slot.selected').forEach(function(el) { el
+                                    .classList.remove('selected'); });
+                            c14 = ty;
+                            this.classList.add('selected');
+                        }
+                    });
+                    var cost = data.c;
+                    slot.innerHTML =
+                        '<div class="tower-icon">' + data.n.split(' ')[0] + '</div><div class="tower-cost">' +
+                        cost + '🪙</div><div class="indicator ' + (b7 >= cost ? 'green' : 'red') + '"></div>';
+                    a7.appendChild(slot);
+                }
+            }
+
+            function f17() {
+                if (c16 && c16.parentNode) c16.remove();
+                c16 = null;
+            }
+
+            function f18(idx) {
+                f17();
+                var t = c3[idx];
+                if (!t) return;
+                var data = d1[t.type];
+                var st = f7(t.type, t.lv);
+                var rect = a1.getBoundingClientRect();
+                var x = t.col * b3 + b3 / 2,
+                    y = t.row * b4 + b4 / 2;
+                var sx = rect.left + (x / (a1.width / rect.width)),
+                    sy = rect.top + (y / (a1.width / rect.width));
+                var pop = document.createElement('div');
+                pop.className = 'tower-popup';
+                var left = sx + 20,
+                    top2 = sy - 40;
+                if (left + 180 > window.innerWidth) left = sx - 180;
+                if (left < 10) left = 10;
+                if (top2 + 170 > window.innerHeight) top2 = sy - 170;
+                if (top2 < 10) top2 = 10;
+                pop.style.left = left + 'px';
+                pop.style.top = top2 + 'px';
+                var content = '<div class="popup-close">✕</div><div><b>' + data.n + ' Lv' + t.lv + '</b></div>';
+                if (t.type === 'farm') {
+                    content += '<div>💰 Total earned: ' + Math.floor(c9[idx] || 0) + '🪙</div>';
+                } else {
+                    content += '<div>💥 Damage: ' + st.dmg + '</div><div>📡 Range: ' + (t.type === 'sniper' ? '∞' :
+                        Math.floor(st.rng)) + '</div><div>⚡ Rate: ' + Math.floor(1000 / st.cd) + '/s</div><div>🗡️ Kills: ' +
+                        (c7[idx] || 0) + '</div>';
+                }
+                var canUp = true;
+                content += '<div style="margin-top:8px;">';
+                if (canUp) {
+                    var cost2 = data.uc + (t.lv - 1) * 25;
+                    content += '<span class="popup-btn" data-action="upgrade">⬆ UPGRADE (' + cost2 + '🪙)</span>';
+                }
+                content += '<span class="popup-btn popup-sell" data-action="sell">💰 SELL</span></div>';
+                pop.innerHTML = content;
+                pop.querySelector('.popup-close').onclick = f17;
+                pop.querySelector('[data-action="upgrade"]')?.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    f16(idx);
+                });
+                pop.querySelector('[data-action="sell"]').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    f19(idx);
+                });
+                document.body.appendChild(pop);
+                c16 = pop;
+                c15 = idx;
+            }
+
+            function f14() {
+                a2.clearRect(0, 0, a1.width, a1.height);
+                var dw = b3,
+                    dh = b4;
+
+                for (var r = 0; r < b2; r++) {
+                    for (var c = 0; c < b1; c++) {
+                        var x = c * dw,
+                            y = r * dh;
+                        var isPath = c1.some(function(p) { return p.x === c && p.y === r; });
+                        if (isPath) {
+                            a2.fillStyle = '#6f4f37';
+                            a2.fillRect(x, y, dw - 0.5, dh - 0.5);
+                            a2.fillStyle = '#9c7a4d';
+                            a2.fillRect(x + 2, y + 2, dw - 5, dh - 5);
+                            if (c === 0 && r === c1[0].y) {
+                                a2.fillStyle = '#ffdd44';
+                                a2.font = dw * 0.6 + 'px monospace';
+                                a2.fillText('→', x + dw / 2 - 8, y + dh / 2 + 6);
+                            }
+                            if (c === b1 - 1 && r === c1[c1.length - 1].y && c18) {
+                                a2.fillStyle = '#ff3333';
+                                a2.font = dw * 0.8 + 'px monospace';
+                                a2.fillText('🚩', x + dw / 2 - 12, y + dh / 2 + 10);
+                            }
+                        } else {
+                            a2.fillStyle = '#2a6b4e';
+                            a2.fillRect(x, y, dw - 0.5, dh - 0.5);
+                            a2.fillStyle = '#398067';
+                            a2.fillRect(x + 1, y + 1, dw - 3, dh - 3);
+                        }
+                    }
+                }
+
+                if (c17 && !c17.done) {
+                    var fx = c17.x,
+                        fy = c17.y;
+                    a2.fillStyle = '#FFD700';
+                    a2.beginPath();
+                    a2.arc(fx, fy, Math.min(dw, dh) * 0.28, 0, Math.PI * 2);
+                    a2.fill();
+                    a2.fillStyle = '#ff3333';
+                    a2.font = dw * 0.8 + 'px monospace';
+                    a2.fillText('🚩', fx - 12, fy - 16);
+                }
+
+                for (var si = 0; si < c5.length; si++) {
+                    var s2 = c5[si];
+                    var sx2 = s2.x * dw,
+                        sy2 = s2.y * dh;
+                    a2.fillStyle = '#ddbb55';
+                    a2.beginPath();
+                    a2.moveTo(sx2 + dw / 2, sy2 + 4);
+                    a2.lineTo(sx2 + dw - 8, sy2 + dh - 8);
+                    a2.lineTo(sx2 + 8, sy2 + dh - 8);
+                    a2.fill();
+                }
+
+                for (var ei7 = 0; ei7 < c6.length; ei7++) {
+                    var exp2 = c6[ei7];
+                    var alpha = exp2.life / exp2.max;
+                    var rad3 = exp2.rad * (1 + (1 - exp2.life / exp2.max) * 0.8);
+                    a2.globalAlpha = alpha * 0.8;
+                    a2.fillStyle = '#ff6600';
+                    a2.beginPath();
+                    a2.arc(exp2.x, exp2.y, rad3, 0, Math.PI * 2);
+                    a2.fill();
+                    a2.fillStyle = '#ffcc00';
+                    a2.beginPath();
+                    a2.arc(exp2.x, exp2.y, rad3 * 0.5, 0, Math.PI * 2);
+                    a2.fill();
+                    a2.globalAlpha = 1;
+                }
+
+                for (var ti = 0; ti < c3.length; ti++) {
+                    var t2 = c3[ti];
+                    var tx4 = t2.col * dw,
+                        ty4 = t2.row * dh;
+                    a2.fillStyle = 'rgba(0,0,0,0.3)';
+                    a2.beginPath();
+                    a2.arc(tx4 + dw / 2, ty4 + dh / 2, Math.min(dw, dh) * 0.4, 0, Math.PI * 2);
+                    a2.fill();
+                    a2.fillStyle = '#FFD966';
+                    a2.font = dw * 0.5 + 'px monospace';
+                    var icon = d1[t2.type].n.split(' ')[0];
+                    a2.fillText(icon, tx4 + dw / 2 - 12, ty4 + dh / 2 + 8);
+                    a2.fillStyle = '#f2e8c9';
+                    a2.font = 'bold 9px monospace';
+                    a2.fillText('Lv' + t2.lv, tx4 + dw - 18, ty4 + 12);
+
+                    if (c15 === ti) {
+                        a2.strokeStyle = '#f4a261';
+                        a2.lineWidth = 2.5;
+                        a2.setLineDash([4, 4]);
+                        a2.strokeRect(tx4 + 2, ty4 + 2, dw - 4, dh - 4);
+                        a2.setLineDash([]);
+                        if (t2.type !== 'sniper') {
+                            var st2 = f7(t2.type, t2.lv);
+                            a2.beginPath();
+                            a2.arc(tx4 + dw / 2, ty4 + dh / 2, st2.rng, 0, Math.PI * 2);
+                            a2.strokeStyle = '#ffff88';
+                            a2.lineWidth = 1.8;
+                            a2.setLineDash([6, 8]);
+                            a2.stroke();
+                            a2.setLineDash([]);
+                        } else {
+                            a2.beginPath();
+                            a2.arc(tx4 + dw / 2, ty4 + dh / 2, Math.max(dw, dh) * 8, 0, Math.PI * 2);
+                            a2.strokeStyle = '#88ffaa';
+                            a2.lineWidth = 1.2;
+                            a2.setLineDash([10, 12]);
+                            a2.stroke();
+                            a2.setLineDash([]);
+                        }
+                        if (t2.type === 'poison' && b11) {
+                            var rad4 = d1.poison.r + (t2.lv - 1) * d1.poison.ur;
+                            a2.beginPath();
+                            a2.arc(tx4 + dw / 2, ty4 + dh / 2, rad4, 0, Math.PI * 2);
+                            a2.fillStyle = 'rgba(0,255,100,0.15)';
+                            a2.fill();
+                            a2.strokeStyle = '#88ffaa';
+                            a2.lineWidth = 2;
+                            a2.setLineDash([8, 8]);
+                            a2.stroke();
+                            a2.setLineDash([]);
+                        }
+                    }
+                }
+
+                for (var ei8 = 0; ei8 < c2.length; ei8++) {
+                    var e7 = c2[ei8];
+                    var hpPct = e7.hp / e7.mx;
+                    a2.fillStyle = e7.co;
+                    a2.beginPath();
+                    a2.arc(e7.x, e7.y, Math.min(dw, dh) * 0.33, 0, Math.PI * 2);
+                    a2.fill();
+                    a2.fillStyle = '#FFE0B3';
+                    a2.font = 'bold 8px monospace';
+                    var lbl = e7.ic ? e7.ic : e7.n.substring(0, 2);
+                    a2.fillText(lbl + ' ' + Math.floor(e7.hp), e7.x - 15, e7.y - 15);
+                    a2.fillStyle = '#8b0000';
+                    a2.fillRect(e7.x - 14, e7.y - 18, 28, 4);
+                    a2.fillStyle = '#4eff6e';
+                    a2.fillRect(e7.x - 14, e7.y - 18, 28 * hpPct, 4);
+                    if (e7.pt > 0) {
+                        a2.fillStyle = '#66ff44';
+                        a2.beginPath();
+                        a2.arc(e7.x, e7.y, 6, 0, Math.PI * 2);
+                        a2.fill();
+                    }
+                }
+
+                for (var pi = 0; pi < c4.length; pi++) {
+                    var p2 = c4[pi];
+                    a2.beginPath();
+                    a2.arc(p2.x, p2.y, 4, 0, Math.PI * 2);
+                    a2.fillStyle = '#ffe484';
+                    a2.fill();
+                }
+
+                if (b12) {
+                    a2.font = 'bold 28px monospace';
+                    a2.fillStyle = '#FFB347';
+                    a2.fillText('💀 GAME OVER', a1.width / 2 - 100, a1.height / 2);
+                }
+            }
+
+            function f33() {
+                var container = a1.parentElement;
+                var rect = container.getBoundingClientRect();
+                var w = rect.width,
+                    h = rect.height;
+                var asp = b2 / b1;
+                var cw, ch;
+                if (w / h > b1 / b2) {
+                    ch = h;
+                    cw = ch / asp;
+                } else {
+                    cw = w;
+                    ch = cw * asp;
+                }
+                a1.width = cw;
+                a1.height = ch;
+                a1.style.width = cw + 'px';
+                a1.style.height = ch + 'px';
+                b3 = a1.width / b1;
+                b4 = a1.height / b2;
+                f14();
+            }
+
+            var g1 = 0;
+
+            function f34(time) {
+                var delta = Math.min(60, (time - g1) || 16) * b15;
+                g1 = time;
+
+                if (c17 && !c17.done) {
+                    f21(delta);
+                } else if (!b12 && b11 && !b13) {
+                    if (!c19 && b10 === 0) {} else {
+                        f28(delta);
+                        f29(delta);
+                        f30(delta);
+                        f31(delta);
+                        f27(delta);
+                        if (c2.length === 0 && c10 === 0 && c12 === 0 && b11) {
+                            f23(true);
+                        }
+                        if (b8 <= 0) f24();
+                        f13();
+                    }
+                }
+                f14();
+                requestAnimationFrame(f34);
+            }
+
+            function f35() {
+                if (c20) clearTimeout(c20);
+                for (var i = 0; i < c3.length; i++) {
+                    if (c3[i].fi) clearInterval(c3[i].fi);
+                    if (c3[i].ai) clearInterval(c3[i].ai);
+                    if (c3[i].si) clearInterval(c3[i].si);
+                }
+                b7 = b5;
+                b8 = b6;
+                b9 = 0;
+                b10 = 0;
+                b11 = false;
+                b12 = false;
+                b13 = false;
+                b14 = false;
+                b15 = b17;
+                c2 = [];
+                c3 = [];
+                c4 = [];
+                c5 = [];
+                c6 = [];
+                c7 = [];
+                c8 = [];
+                c9 = [];
+                c10 = 0;
+                c11 = 0;
+                c12 = 0;
+                c13 = 0;
+                c17 = null;
+                c18 = false;
+                c19 = false;
+                c14 = null;
+                c15 = -1;
+                f17();
+                c1 = f5();
+                f13();
+                f33();
+                f15();
+                document.getElementById('turboItem').innerHTML = '<span class="icon">⏩</span> Toggle Turbo';
+                document.getElementById('pauseItem').innerHTML = '<span class="icon">⏸️</span> Pause';
+                f9('Game restarted with new map');
+                f14();
+            }
+
+            a1.addEventListener('click', function(e) {
+                if (b12) return;
+                var rect = a1.getBoundingClientRect();
+                var mx = e.clientX - rect.left,
+                    my = e.clientY - rect.top;
+                var col = Math.floor(mx / b3),
+                    row = Math.floor(my / b4);
+                if (col >= 0 && col < b1 && row >= 0 && row < b2) {
+                    var idx = c3.findIndex(function(t) { return t.col === col && t.row === row; });
+                    if (idx !== -1) {
+                        f18(idx);
+                        f14();
+                        return;
+                    } else {
+                        f17();
+                        c15 = -1;
+                        if (f6(col, row)) {
+                            if (c14) {
+                                if (f8(col, row, c14)) {
+                                    f9('Placed ' + d1[c14].n);
+                                    f13();
+                                }
+                            } else {
+                                f9('Select a tower from sidebar first');
+                            }
+                        } else {
+                            f9('Path tile');
+                        }
+                        f14();
+                    }
+                } else {
+                    f17();
+                    c15 = -1;
+                    f14();
+                }
+            });
+
+            a1.addEventListener('dragover', function(e) { e.preventDefault(); });
+            a1.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var type = e.dataTransfer.getData('text/plain');
+                if (!type) return;
+                var rect = a1.getBoundingClientRect();
+                var mx = e.clientX - rect.left,
+                    my = e.clientY - rect.top;
+                var col = Math.floor(mx / b3),
+                    row = Math.floor(my / b4);
+                if (col >= 0 && col < b1 && row >= 0 && row < b2 && f6(col, row)) {
+                    if (f8(col, row, type)) {
+                        f9('Placed ' + d1[type].n);
+                        f13();
+                    }
+                } else {
+                    f9('Cannot place here');
+                }
+            });
+
+            var h1 = document.getElementById('hamburgerBtn');
+            var h2 = document.getElementById('dropdownMenu');
+            h1.addEventListener('click', function(e) {
+                e.stopPropagation();
+                h2.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e) {
+                if (!h2.contains(e.target) && e.target !== h1) {
+                    h2.classList.remove('open');
+                }
+            });
+
+            document.getElementById('pauseItem').addEventListener('click', function() {
+                h2.classList.remove('open');
+                b13 = !b13;
+                var ic = this.querySelector('.icon');
+                if (b13) {
+                    ic.textContent = '▶️';
+                    this.innerHTML = '<span class="icon">▶️</span> Resume';
+                } else {
+                    ic.textContent = '⏸️';
+                    this.innerHTML = '<span class="icon">⏸️</span> Pause';
+                }
+                f9(b13 ? 'Paused' : 'Resumed');
+            });
+
+            document.getElementById('forceWaveItem').addEventListener('click', function() {
+                h2.classList.remove('open');
+                f25();
+            });
+
+            document.getElementById('turboItem').addEventListener('click', function() {
+                h2.classList.remove('open');
+                b14 = !b14;
+                b15 = b14 ? b16 : b17;
+                var ic = this.querySelector('.icon');
+                if (b14) {
+                    ic.textContent = '⏩';
+                    this.innerHTML = '<span class="icon">⏩</span> Turbo ON';
+                } else {
+                    ic.textContent = '⏩';
+                    this.innerHTML = '<span class="icon">⏩</span> Turbo OFF';
+                }
+                f9(b14 ? 'Turbo ON' : 'Turbo OFF');
+            });
+
+            document.getElementById('restartItem').addEventListener('click', function() {
+                h2.classList.remove('open');
+                if (confirm('Restart game? (New map will be generated)')) {
+                    f35();
+                }
+            });
+
+            function f9(msg) {
+                console.log('[TD] ' + msg);
+            }
+
+            function f36() {
+                c1 = f5();
+                f13();
+                f33();
+                f15();
+                requestAnimationFrame(f34);
+                window.addEventListener('resize', f33);
+                f9('Light Tower Defense started');
+            }
+
+            f36();
+        })();
+
+        (function() {
+            var contactBtn = document.getElementById('contactBtn');
+            var contactModal = document.getElementById('contactModal');
+            var closeBtn = document.getElementById('closeContactModal');
+
+            function openModal() {
+                contactModal.classList.add('active');
+            }
+
+            function closeModal() {
+                contactModal.classList.remove('active');
+            }
+
+            contactBtn.addEventListener('click', openModal);
+            closeBtn.addEventListener('click', closeModal);
+            contactModal.addEventListener('click', function(e) {
+                if (e.target === contactModal) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        })();
+    </script>
+</body>
+</html>
